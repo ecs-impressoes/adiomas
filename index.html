@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Idiomas - 4 Línguas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-slate-50">
+<div id="app" class="max-w-7xl mx-auto p-4"></div>
+<script>
+const API = location.origin;
+let token = localStorage.getItem('token');
+let user = JSON.parse(localStorage.getItem('user')||'null');
+const idiomas = ['Inglês','Espanhol','Francês','Alemão'];
+
+async function api(path, method='GET', body) {
+  const res = await fetch(API+path, {method, headers: {'Content-Type':'application/json', 'Authorization':'Bearer '+token}, body: body?JSON.stringify(body):undefined});
+  if (!res.ok) throw new Error((await res.json()).error||'Erro');
+  return res.json();
+}
+
+function renderLogin() {
+  app.innerHTML = `<div class="max-w-md mx-auto mt-20 bg-white p-8 rounded-2xl shadow-xl">
+    <h1 class="text-3xl font-bold mb-6 text-center text-blue-600">Sistema de Idiomas</h1>
+    <input id="usuario" placeholder="Usuário" class="w-full border p-3 mb-3 rounded-lg">
+    <input id="senha" type="password" placeholder="Senha" class="w-full border p-3 mb-4 rounded-lg">
+    <button onclick="login()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700">Entrar</button>
+    <p class="text-xs text-gray-500 mt-4 text-center">Admin: admin / admin123</p>
+  </div>`;
+}
+
+async function login() {
+  try {
+    const data = await api('/api/login','POST',{usuario:usuario.value,senha:senha.value});
+    token = data.token; user = data;
+    localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user));
+    location.reload();
+  } catch(e) { alert(e.message); }
+}
+
+function logout() { localStorage.clear(); location.reload(); }
+
+function render() {
+  if (!token) return renderLogin();
+  const isAdmin = user.tipo === 'admin';
+  app.innerHTML = `<div class="flex justify-between items-center mb-6 bg-white p-5 rounded-2xl shadow">
+    <div><h1 class="text-2xl font-bold">Olá, ${user.nome}</h1><p class="text-gray-600">${isAdmin?'Painel Admin':'Idioma: '+user.idioma}</p></div>
+    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">Sair</button>
+  </div><div id="tabs" class="flex gap-2 mb-4 flex-wrap"></div><div id="conteudo"></div>`;
+  
+  const tabs = isAdmin?['Alunos','Aulas','Financeiro','Atividades']:['Desempenho','Mensalidades','Atividades'];
+  tabs.forEach((t,i)=>{
+    const b=document.createElement('button');
+    b.className='px-4 py-2 bg-white rounded-lg shadow hover:bg-blue-50';
+    b.textContent=t; b.onclick=()=>carregaTab(t,b);
+    document.getElementById('tabs').appendChild(b);
+    if(i===0)b.click();
+  });
+}
+
+function carregaTab(tab,btn){
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.remove('bg-blue-600','text-white'));
+  btn.classList.add('bg-blue-600','text-white');
+  const c=document.getElementById('conteudo');
+  if(tab==='Alunos')c.innerHTML=abaAlunos();
+  if(tab==='Aulas')c.innerHTML=abaAulas();
+  if(tab==='Financeiro')c.innerHTML=abaFinanceiro();
+  if(tab==='Atividades')c.innerHTML=abaAtividades();
+  if(tab==='Desempenho')abaDesempenho();
+  if(tab==='Mensalidades')abaMensalidadesAluno();
+}
+
+function abaAlunos(){
+  api('/api/alunos').then(alunos=>{
+    document.getElementById('listaAlunos').innerHTML=alunos.map(a=>`
+      <div class="border-b py-2 flex justify-between items-center">
+        <div><b>${a.nome}</b><br><span class="text-sm text-gray-500">${a.idioma} - @${a.usuario}</span></div>
+        <button onclick="gerarPDF(${a.id},'${a.nome}')" class="text-blue-600 text-sm">PDF</button>
+      </div>`).join('')||'<p class="text-gray-500">Nenhum aluno</p>';
+    document.getElementById('totalAlunos').textContent=alunos.length;
+  });
+  return `<div class="grid lg:grid-cols-2 gap-4">
+    <div class="bg-white p-6 rounded-2xl shadow">
+      <h2 class="font-bold text-xl mb-4">Cadastrar Aluno</h2>
+      <input id="a_nome" placeholder="Nome completo" class="w-full border p-2 mb-2 rounded">
+      <input id="a_user" placeholder="Usuário" class="w-full border p-2 mb-2 rounded">
+      <input id="a_senha" placeholder="Senha" class="w-full border p-2 mb-2 rounded">
+      <select id="a_idioma" class="w-full border p-2 mb-3 rounded">${idiomas.map(i=>`<option>${i}</option>`).join('')}</select>
+      <button onclick="cadastraAluno()" class="bg-green-600 text-white px-4 py-2 rounded w-full">Cadastrar</button>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow">
+      <h2 class="font-bold text-xl mb-4">Alunos: <span id="totalAlunos">0</span>/50</h2>
+      <div id="listaAlunos" class="max-h-96 overflow-y-auto"></div>
+    </div></div>`;
+}
+
+async function cadastraAluno(){
+  try{
+    await api('/api/alunos','POST',{nome:a_nome.value,usuario:a_user.value,senha:a_senha.value,idioma:a_idioma.value});
+    alert('Cadastrado!'); carregaTab('Alunos',document.querySelector('#tabs button'));
+  }catch(e){alert(e.message)}
+}
+
+function abaAulas(){
+  api('/api/aulas').then(aulas=>{
+    sel_aula.innerHTML='<option value="">Selecione a aula</option>'+aulas.map(a=>`<option value="${a.id}">${a.data} - ${a.idioma} - ${a.tema}</option>`).join('');
+  });
+  return `<div class="grid lg:grid-cols-2 gap-4">
+    <div class="bg-white p-6 rounded-2xl shadow">
+      <h2 class="font-bold text-xl mb-4">Nova Aula</h2>
+      <select id="au_idioma" class="w-full border p-2 mb-2 rounded">${idiomas.map(i=>`<option>${i}</option>`).join('')}</select>
+      <input id="au_periodo" placeholder="Período ex: 2026.1" class="w-full border p-2 mb-2 rounded">
+      <input id="au_data" type="date" class="w-full border p-2 mb-2 rounded">
+      <input id="au_tema" placeholder="Tema da aula" class="w-full border p-2 mb-3 rounded">
+      <button onclick="criaAula()" class="bg-blue-600 text-white px-4 py-2 rounded w-full">Criar Aula</button>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow">
+      <h2 class="font-bold text-xl mb-4">Lançar Presença e Nota</h2>
+      <select id="sel_aula" onchange="mostraAlunosAula()" class="w-full border p-2 mb-3 rounded"></select>
+      <div id="lista_presenca" class="max-h-80 overflow-y-auto"></div>
+    </div></div>`;
+}
+
+async function criaAula(){
+  await api('/api/aulas','POST',{idioma:au_idioma.value,periodo:au_periodo.value,data:au_data.value,tema:au_tema.value});
+  alert('Aula criada!'); carregaTab('Aulas',document.querySelector('#tabs button:nth-child(2)'));
+}
+
+async function mostraAlunosAula(){
+  const aulaId=+sel_aula.value; if(!aulaId)return;
+  const aulas=await api('/api/aulas'); const aula=aulas.find(a=>a.id===aulaId);
+  const alunos=(await api('/api/alunos')).filter(a=>a.idioma===aula.idioma);
+  lista_presenca.innerHTML=alunos.map(al=>`
+    <div class="border-b py-2"><p class="font-bold">${al.nome}</p>
+      <div class="flex gap-2 mt-1">
+        <label class="flex items-center gap-1"><input type="checkbox" id="p_${al.id}"> Presente</label>
+        <input type="number" id="n_${al.id}" placeholder="Nota" min="0" max="10" step="0.1" class="border p-1 rounded w-20">
+      </div></div>`).join('')+`<button onclick="salvaPresencaNota(${aulaId})" class="bg-green-600 text-white px-4 py-2 rounded mt-3 w-full">Salvar</button>`;
+}
+
+async function salvaPresencaNota(aulaId){
+  const alunos=await api('/api/alunos');
+  const presencas=[], notas=[];
+  alunos.forEach(al=>{
+    if(document.getElementById(`p_${al.id}`)?.checked) presencas.push({aluno_id:al.id,presente:1});
+    const nota=document.getElementById(`n_${al.id}`)?.value;
+    if(nota) notas.push({aluno_id:al.id,nota:+nota});
+  });
+  if(presencas.length) await api('/api/presenca','POST',{aula_id:aulaId,presencas});
+  if(notas.length) await api('/api/notas','POST',{aula_id:aulaId,notas});
+  alert('Salvo!');
+}
+
+function abaFinanceiro(){
+  api('/api/financeiro').then(f=>{
+    document.getElementById('fin').innerHTML=`
+      <div class="bg-green-100 p-4 rounded-xl"><p class="text-sm">Recebido</p><p class="text-2xl font-bold">R$ ${(f.recebido||0).toFixed(2)}</p></div>
+      <div class="bg-yellow-100 p-4 rounded-xl"><p class="text-sm">A Receber</p><p class="text-2xl font-bold">R$ ${(f.a_receber||0).toFixed(2)}</p></div>
+      <div class="bg-red-100 p-4 rounded-xl"><p class="text-sm">Inadimplência</p><p class="text-2xl font-bold">R$ ${(f.inadimplencia||0).toFixed(2)}</p></div>`;
+  });
+  api('/api/alunos').then(alunos=>{
+    m_aluno.innerHTML='<option value="">Aluno</option>'+alunos.map(a=>`<option value="${a.id}">${a.nome}</option>`).join('');
+  });
+  return `<div id="fin" class="grid md:grid-cols-3 gap-4 mb-4"></div>
+    <div class="bg-white p-6 rounded-2xl shadow">
+      <h2 class="font-bold text-xl mb-4">Lançar Mensalidade</h2>
+      <div class="grid md:grid-cols-5 gap-2">
+        <select id="m_aluno" class="border p-2 rounded"></select>
+        <input id="m_valor" type="number" placeholder="Valor R$" class="border p-2 rounded">
+        <input id="m_venc" type="date" class="border p-2 rounded">
+        <select id="m_status" class="border p-2 rounded"><option>Pendente</option><option>Pago</option><option>Atrasado</option></select>
+        <button onclick="lancaMensalidade()" class="bg-purple-600 text-white rounded">Lançar</button>
+      </div></div>`;
+}
+
+async function lancaMensalidade(){
+  await api('/api/mensalidades','POST',{aluno_id:+m_aluno.value,valor:+m_valor.value,vencimento:m_venc.value,status:m_status.value});
+  carregaTab('Financeiro',document.querySelector('#tabs button:nth-child(3)'));
+}
+
+function abaAtividades(){
+  api('/api/aulas').then(aulas=>{
+    at_aula.innerHTML='<option value="">Selecione a aula</option>'+aulas.map(a=>`<option value="${a.id}">${a.data} - ${a.idioma} - ${a.tema}</option>`).join('');
+  });
+  return `<div class="bg-white p-6 rounded-2xl shadow">
+    <h2 class="font-bold text-xl mb-4">Criar Atividade</h2>
+    <div class="grid md:grid-cols-4 gap-2">
+      <select id="at_aula" class="border p-2 rounded"></select>
+      <input id="at_titulo" placeholder="Título" class="border p-2 rounded">
+      <input id="at_desc" placeholder="Descrição" class="border p-2 rounded">
+      <button onclick="criaAtividade()" class="bg-blue-600 text-white rounded">Criar</button>
+    </div></div>`;
+}
+
+async function criaAtividade(){
+  await api('/api/atividades','POST',{aula_id:+at_aula.value,titulo:at_titulo.value,descricao:at_desc.value});
+  alert('Atividade criada!');
+}
+
+async function abaDesempenho(){
+  const d=await api('/api/desempenho/'+user.id);
+  const c=document.getElementById('conteudo');
+  c.innerHTML=`<div class="bg-white p-6 rounded-2xl shadow mb-4">
+    <h2 class="font-bold text-xl mb-4">Seu Desempenho - ${user.idioma}</h2><canvas id="grafico"></canvas></div>
+    <div class="bg-white p-6 rounded-2xl shadow"><h2 class="font-bold text-xl mb-4">Resumo por Período</h2>
+    ${d.map(x=>{
+      const freq=x.total?Math.round(x.presencas/x.total*100):0;
+      return `<div class="border-b py-3"><b>${x.periodo}</b> - Média: ${Number(x.media||0).toFixed(1)} | Frequência: ${freq}%</div>`
+    }).join('')||'<p class="text-gray-500">Nenhuma aula ainda</p>'}</div>`;
+  if(d.length) new Chart(document.getElementById('grafico'),{type:'bar',data:{labels:d.map(x=>x.periodo),datasets:[{label:'Média',data:d.map(x=>x.media),backgroundColor:'#3b82f6'}]}});
+}
+
+async function abaMensalidadesAluno(){
+  const m=await api('/api/mensalidades/'+user.id);
+  document.getElementById('conteudo').innerHTML=`<div class="bg-white p-6 rounded-2xl shadow">
+    <h2 class="font-bold text-xl mb-4">Suas Mensalidades</h2>
+    ${m.map(x=>`<div class="border-b py-3 flex justify-between">
+      <div><p class="font-bold">R$ ${x.valor.toFixed(2)}</p><p class="text-sm text-gray-500">Venc: ${x.vencimento}</p></div>
+      <span class="px-3 py-1 rounded text-sm ${x.status==='Pago'?'bg-green-100 text-green-700':x.status==='Atrasado'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${x.status}</span>
+    </div>`).join('')||'<p class="text-gray-500">Nenhuma mensalidade</p>'}</div>`;
+}
+
+async function gerarPDF(alunoId,nome){
+  const d=await api('/api/desempenho/'+alunoId);
+  const {jsPDF}=window.jspdf; const doc=new jsPDF();
+  doc.setFontSize(18); doc.text('Relatório de Desempenho',20,20);
+  doc.setFontSize(12); doc.text(`Aluno: ${nome}`,20,35);
+  let y=50; d.forEach(x=>{
+    const freq=x.total?Math.round(x.presencas/x.total*100):0;
+    doc.text(`${x.periodo} - Média: ${Number(x.media||0).toFixed(1)} | Frequência: ${freq}%`,20,y); y+=7;
+  });
+  doc.save(`relatorio_${nome}.pdf`);
+}
+
+render();
+</script>
+</body>
+</html>
