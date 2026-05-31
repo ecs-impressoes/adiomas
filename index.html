@@ -1,506 +1,785 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pack Colecionador Digital da Copa | +900 Figurinhas</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Gerador de Etiquetas Mimo - 1000 Tags</title>
 <style>
-  body {
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600;700&family=Dancing+Script:wght@400;600;700&family=Amatic+SC:wght@400;700&family=Pacifico&family=Quicksand:wght@300;400;600&family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Sacramento&family=Josefin+Sans:wght@300;400;600&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+:root {
+    --blush: #FADADD;
+    --lavanda: #E6E6FA;
+    --menta: #C1F0DC;
+    --azul: #A7C7E7;
+    --dourado: #D4AF37;
+    --kraft: #C4A484;
+    --preto: #2C2C2C;
+    --verde: #8FBC8F;
+    --coral: #FFB5A7;
+    --terracota: #E07A5F;
+}
+
+body {
     font-family: 'Montserrat', sans-serif;
-    scroll-behavior: smooth;
-  }
-  .font-bebas {
-    font-family: 'Bebas Neue', sans-serif;
-  }
-  .hero-gradient {
-    background: linear-gradient(135deg, #009c3b 0%, #00692c 50%, #ffdf00 100%);
-  }
-  .text-gradient {
-    background: linear-gradient(90deg, #009c3b, #ffdf00);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .btn-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: .9; transform: scale(1.03); }
-  }
-  .floating {
-    animation: floating 3s ease-in-out infinite;
-  }
-  @keyframes floating {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
-  }
-  .cta-sticky {
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-  }
-  .mockup-shadow {
-    filter: drop-shadow(0 20px 30px rgba(0, 156, 59, 0.25));
-  }
-  .check-icon::before {
-    content: '✓';
-    display: inline-flex;
+    background: #f5f5f5;
+    color: #333;
+}
+
+.no-print {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.subtitle {
+    opacity: 0.9;
+    margin-bottom: 2rem;
+    font-weight: 300;
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+select, button {
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Montserrat', sans-serif;
+    transition: all 0.3s ease;
+}
+
+select {
+    background: white;
+    color: #333;
+    cursor: pointer;
+}
+
+select:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+button {
+    background: white;
+    color: #667eea;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: #D4AF37;
+    color: white;
+}
+
+.instructions {
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.instructions strong {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.stat {
+    background: rgba(255,255,255,0.15);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+#tagsContainer {
+    background: white;
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+.page {
+    width: 21cm;
+    min-height: 29.7cm;
+    margin: 0 auto 2rem;
+    background: white;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    page-break-after: always;
+    padding: 1cm;
+}
+
+.tags-grid {
+    display: grid;
+    gap: 0.5cm;
+    justify-content: center;
+}
+
+.tags-grid.size-45 { grid-template-columns: repeat(6, 4.5cm); }
+.tags-grid.size-50 { grid-template-columns: repeat(5, 5cm); }
+.tags-grid.size-55 { grid-template-columns: repeat(4, 5.5cm); }
+
+.tag {
+    position: relative;
+    border-radius: 50%;
+    display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    background: #009c3b;
-    color: white;
+    page-break-inside: avoid;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.tag.size-45 { width: 4.5cm; height: 4.5cm; }
+.tag.size-50 { width: 5cm; height: 5cm; }
+.tag.size-55 { width: 5.5cm; height: 5.5cm; }
+
+.tag-content {
+    text-align: center;
+    padding: 0.5cm;
+    z-index: 2;
+    position: relative;
+    width: 100%;
+}
+
+.tag-text {
+    line-height: 1.2;
+    word-wrap: break-word;
+}
+
+.tag-hole {
+    position: absolute;
+    top: 0.3cm;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0.3cm;
+    height: 0.3cm;
     border-radius: 50%;
-    margin-right: 12px;
+    background: white;
+    border: 1px solid #ddd;
+    z-index: 3;
+}
+
+/* ESTILOS: RUSTICO */
+.style-rustic {
+    background: var(--kraft);
+    font-family: 'Amatic SC', cursive;
+}
+.style-rustic .tag-text { 
+    color: #5C4033; 
+    font-size: 1.4em;
     font-weight: 700;
-  }
+    text-transform: uppercase;
+}
+.style-rustic::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(92,64,51,0.03) 2px, rgba(92,64,51,0.03) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(92,64,51,0.03) 2px, rgba(92,64,51,0.03) 4px);
+}
+
+/* ESTILOS: FLORAL */
+.style-floral {
+    background: radial-gradient(circle at 30% 20%, #fff 0%, var(--lavanda) 100%);
+    font-family: 'Cormorant Garamond', serif;
+}
+.style-floral .tag-text { 
+    color: #6B4E71; 
+    font-size: 1.1em;
+    font-style: italic;
+}
+.style-floral::after {
+    content: 'â';
+    position: absolute;
+    font-size: 2.5cm;
+    opacity: 0.08;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* ESTILOS: MINIMALISTA */
+.style-minimalist {
+    background: white;
+    border: 2px solid var(--preto);
+    font-family: 'Montserrat', sans-serif;
+}
+.style-minimalist .tag-text { 
+    color: var(--preto); 
+    font-size: 0.9em;
+    font-weight: 300;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* ESTILOS: BOHO */
+.style-boho {
+    background: linear-gradient(135deg, var(--terracota) 0%, var(--coral) 100%);
+    font-family: 'Sacramento', cursive;
+}
+.style-boho .tag-text { 
+    color: white; 
+    font-size: 1.6em;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+.style-boho::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 2px dashed rgba(255,255,255,0.4);
+    border-radius: 50%;
+}
+
+/* ESTILOS: LUXURY */
+.style-luxury {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    font-family: 'Playfair Display', serif;
+    border: 3px double var(--dourado);
+}
+.style-luxury .tag-text { 
+    color: var(--dourado); 
+    font-size: 1em;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+/* ESTILOS: PASTEL */
+.style-pastel {
+    background: linear-gradient(135deg, var(--blush) 0%, var(--menta) 100%);
+    font-family: 'Quicksand', sans-serif;
+}
+.style-pastel .tag-text { 
+    color: #7A5C58; 
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+/* ESTILOS: GEOMETRIC */
+.style-geometric {
+    background: var(--azul);
+    font-family: 'Josefin Sans', sans-serif;
+    position: relative;
+}
+.style-geometric .tag-text { 
+    color: white; 
+    font-size: 1em;
+    font-weight: 600;
+    text-transform: uppercase;
+    z-index: 2;
+}
+.style-geometric::before {
+    content: '';
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    background: rgba(255,255,255,0.15);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+/* ESTILOS: VINTAGE */
+.style-vintage {
+    background: #F5E6D3;
+    font-family: 'Dancing Script', cursive;
+    border: 2px solid var(--dourado);
+}
+.style-vintage .tag-text { 
+    color: #8B4513; 
+    font-size: 1.4em;
+}
+.style-vintage::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border: 1px solid var(--dourado);
+    border-radius: 50%;
+    opacity: 0.3;
+}
+
+/* ESTILOS: NATAL */
+.style-natal {
+    background: linear-gradient(135deg, #c41e3a 0%, #006400 100%);
+    font-family: 'Bebas Neue', cursive;
+}
+.style-natal .tag-text { 
+    color: white; 
+    font-size: 1.2em;
+    letter-spacing: 1px;
+}
+.style-natal::after {
+    content: 'â';
+    position: absolute;
+    top: 0.5cm;
+    right: 0.5cm;
+    font-size: 1cm;
+    color: var(--dourado);
+    opacity: 0.5;
+}
+
+/* ESTILOS: INFANTIL */
+.style-infantil {
+    background: var(--coral);
+    font-family: 'Pacifico', cursive;
+}
+.style-infantil .tag-text { 
+    color: white; 
+    font-size: 1.3em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+.style-infantil::before {
+    content: 'â¥';
+    position: absolute;
+    font-size: 3cm;
+    opacity: 0.1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* ESTILOS: BOTÃNICO */
+.style-botanico {
+    background: var(--verde);
+    font-family: 'Cormorant Garamond', serif;
+}
+.style-botanico .tag-text { 
+    color: white; 
+    font-size: 1.1em;
+    font-style: italic;
+}
+.style-botanico::after {
+    content: 'ð';
+    position: absolute;
+    bottom: 0.4cm;
+    font-size: 1.5cm;
+    opacity: 0.3;
+    transform: rotate(-15deg);
+}
+
+/* ESTILOS: KAWAII */
+.style-kawaii {
+    background: var(--blush);
+    font-family: 'Quicksand', sans-serif;
+}
+.style-kawaii .tag-text { 
+    color: #D47B9E; 
+    font-size: 1em;
+    font-weight: 600;
+}
+.style-kawaii::before {
+    content: '(ââ¿â)';
+    position: absolute;
+    top: 0.6cm;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.6cm;
+    opacity: 0.3;
+}
+
+/* ESTILOS: LETTERING */
+.style-lettering {
+    background: white;
+    font-family: 'Dancing Script', cursive;
+}
+.style-lettering .tag-text { 
+    color: var(--preto); 
+    font-size: 1.8em;
+    font-weight: 700;
+    transform: rotate(-5deg);
+}
+.style-lettering::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30%;
+    background: linear-gradient(to top, var(--dourado) 0%, transparent 100%);
+    opacity: 0.2;
+}
+
+/* ESTILOS: AQUARELA */
+.style-aquarela {
+    background: radial-gradient(circle at 20% 30%, var(--lavanda) 0%, var(--menta) 40%, var(--blush) 100%);
+    font-family: 'Sacramento', cursive;
+}
+.style-aquarela .tag-text { 
+    color: #6B4E71; 
+    font-size: 1.6em;
+}
+.style-aquarela::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 70% 80%, rgba(255,255,255,0.4) 0%, transparent 50%);
+    mix-blend-mode: overlay;
+}
+
+/* ESTILOS: KRAFT */
+.style-kraft {
+    background: var(--kraft);
+    font-family: 'Bebas Neue', cursive;
+    border: 3px solid #5C4033;
+}
+.style-kraft .tag-text { 
+    color: #5C4033; 
+    font-size: 1.3em;
+    letter-spacing: 2px;
+}
+
+/* AnimaÃ§Ãµes para preview */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.tag {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* IMPRESSÃO */
+@media print {
+    .no-print { display: none !important; }
+    body { background: white; margin: 0; }
+    #tagsContainer { padding: 0; }
+    .page { 
+        margin: 0; 
+        box-shadow: none; 
+        page-break-after: always;
+        width: 21cm;
+        height: 29.7cm;
+    }
+    .page:last-child { page-break-after: auto; }
+    .tag { box-shadow: none; border: 0.5px dashed #ddd; }
+}
+
+@media (max-width: 768px) {
+    h1 { font-size: 1.8rem; }
+    .controls { grid-template-columns: 1fr; }
+    .page { width: 100%; padding: 0.5cm; }
+    .tags-grid.size-45 { grid-template-columns: repeat(3, 4.5cm); }
+    .tags-grid.size-50 { grid-template-columns: repeat(3, 5cm); }
+    .tags-grid.size-55 { grid-template-columns: repeat(2, 5.5cm); }
+}
+
+.loading {
+    text-align: center;
+    padding: 4rem;
+    font-size: 1.2rem;
+    color: #667eea;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 1rem auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 </style>
 </head>
-<body class="bg-gray-50 text-gray-800 antialiased">
-
-<!-- Hero Section -->
-<section class="hero-gradient text-white pt-8 pb-20 md:py-24 relative overflow-hidden">
-  <div class="absolute inset-0 opacity-10">
-    <div class="absolute top-10 left-10 w-40 h-40 bg-yellow-300 rounded-full blur-3xl"></div>
-    <div class="absolute bottom-10 right-10 w-60 h-60 bg-green-300 rounded-full blur-3xl"></div>
-  </div>
-  
-  <div class="max-w-6xl mx-auto px-4 relative z-10">
-    <div class="flex flex-col lg:flex-row items-center gap-10">
-      <div class="lg:w-1/2 text-center lg:text-left">
-        <span class="inline-block bg-yellow-400 text-green-900 font-bold px-4 py-1 rounded-full text-sm mb-4">EDICAO LIMITADA 2026</span>
-        <h1 class="font-bebas text-5xl md:text-6xl lg:text-7xl leading-none mb-6 tracking-wide">
-          A FEBRE DAS FIGURINHAS DA COPA VOLTOU...
-        </h1>
-        <div class="space-y-3 mb-8">
-          <p class="text-2xl md:text-3xl font-extrabold text-yellow-300">MAIS DE 900 FIGURINHAS</p>
-          <p class="text-2xl md:text-3xl font-extrabold text-yellow-300">+ ÁLBUM DIGITAL COMPLETO</p>
-          <p class="text-xl md:text-2xl font-semibold">DIRETO NO SEU CELULAR 📱</p>
+<body>
+<div class="no-print">
+    <div class="container">
+        <h1>ð·ï¸ Gerador de Etiquetas Mimo</h1>
+        <p class="subtitle">Crie 1000 etiquetas redondas Ãºnicas para seus produtos artesanais</p>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="sizeSelect">Tamanho da Etiqueta</label>
+                <select id="sizeSelect">
+                    <option value="45">4,5 cm (6 por linha)</option>
+                    <option value="50" selected>5,0 cm (5 por linha)</option>
+                    <option value="55">5,5 cm (4 por linha)</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="quantitySelect">Quantidade</label>
+                <select id="quantitySelect">
+                    <option value="100">100 etiquetas</option>
+                    <option value="250">250 etiquetas</option>
+                    <option value="500">500 etiquetas</option>
+                    <option value="1000" selected>1000 etiquetas</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="styleFilter">Filtrar Estilo</label>
+                <select id="styleFilter">
+                    <option value="all">Todos os estilos</option>
+                    <option value="rustic">RÃºstico</option>
+                    <option value="floral">Floral</option>
+                    <option value="minimalist">Minimalista</option>
+                    <option value="boho">Boho</option>
+                    <option value="luxury">Luxury</option>
+                    <option value="pastel">Pastel</option>
+                    <option value="geometric">GeomÃ©trico</option>
+                    <option value="vintage">Vintage</option>
+                    <option value="natal">Natal</option>
+                    <option value="infantil">Infantil</option>
+                    <option value="botanico">BotÃ¢nico</option>
+                    <option value="kawaii">Kawaii</option>
+                    <option value="lettering">Lettering</option>
+                    <option value="aquarela">Aquarela</option>
+                    <option value="kraft">Kraft</option>
+                </select>
+            </div>
         </div>
         
-        <a href="https://wa.me/5513988089754?text=Oi!%20Quero%20o%20Pack%20Colecionador%20Digital%20da%20Copa%20por%20R%249,99" target="_blank" class="btn-pulse inline-block bg-yellow-400 hover:bg-yellow-300 text-green-900 font-black text-lg md:text-xl px-8 py-4 rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
-          QUERO RECEBER MEU PACK AGORA <i class="fa-solid fa-arrow-right ml-2"></i>
-        </a>
+        <div class="btn-group">
+            <button class="btn-primary" onclick="generateTags()">â¨ Gerar Etiquetas</button>
+            <button onclick="window.print()">ð¨ï¸ Imprimir / Salvar PDF</button>
+            <button onclick="downloadInstructions()">ð InstruÃ§Ãµes de Corte</button>
+        </div>
         
-        <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-6 text-sm">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-lock text-yellow-300"></i>
-            <span>Pagamento 100% seguro</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-bolt text-yellow-300"></i>
-            <span>Acesso imediato</span>
-          </div>
+        <div class="stats">
+            <div class="stat">ð Total de estilos: 15</div>
+            <div class="stat">ð¨ Paletas de cores: 10</div>
+            <div class="stat">ð¬ Frases Ãºnicas: 19</div>
+            <div class="stat" id="pageCount">ð PÃ¡ginas: 0</div>
         </div>
-      </div>
-      
-      <div class="lg:w-1/2 floating">
-        <div class="relative mockup-shadow">
-          <img src="https://placehold.co/600x700/009c3b/ffffff?text=PACK+COLECIONADOR%0A+900+FIGURINHAS+%0A%C1LBUM+DIGITAL" alt="Mockup Pack Colecionador Digital" class="w-full max-w-md mx-auto rounded-2xl">
-          <div class="absolute -top-4 -right-4 bg-red-600 text-white font-bold px-4 py-2 rounded-full text-sm rotate-12 shadow-lg">-80% HOJE</div>
+        
+        <div class="instructions">
+            <strong>ð InstruÃ§Ãµes de ImpressÃ£o e Corte:</strong>
+            1. Use papel couchÃª 180g-300g ou adesivo vinÃ­lico para melhor resultado â¢ 
+            2. Configure a impressora para "Tamanho Real" e desative margens â¢ 
+            3. Recorte com tesoura de precisÃ£o, cortador circular ou mÃ¡quina Cricut â¢ 
+            4. O furinho no topo Ã© opcional - use furador de papel 3mm â¢ 
+            5. Para etiquetas adesivas, use folha A4 com adesivo removÃ­vel
         </div>
-      </div>
     </div>
-  </div>
-</section>
+</div>
 
-<!-- Nostalgia Section -->
-<section class="py-16 md:py-24 bg-white">
-  <div class="max-w-4xl mx-auto px-4 text-center">
-    <h2 class="font-bebas text-4xl md:text-5xl text-green-700 mb-6">
-      😢 VOCÊ TAMBÉM SENTE SAUDADE DA ÉPOCA EM QUE ABRIR PACOTINHO ERA UMA EMOÇÃO?
-    </h2>
-    <div class="w-20 h-1 bg-yellow-400 mx-auto mb-8"></div>
-    <p class="text-lg md:text-xl text-gray-600 leading-relaxed mb-8">
-      Aquela ansiedade de rasgar o pacotinho, a alegria de achar um jogador raro, a resenha na escola pra <span class="font-bold text-green-700">trocar repetida</span>, a missão de <span class="font-bold text-green-700">completar o álbum</span> e as discussões sobre <span class="font-bold text-green-700">quem ia ganhar a Copa</span>...
-    </p>
-    <p class="text-2xl font-bold text-green-800">
-      Essa emoção voltou. E agora cabe no seu bolso. 💚💛
-    </p>
-    
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
-      <div class="bg-gray-50 p-4 rounded-xl">
-        <img src="https://placehold.co/200x280/cccccc/009c3b?text=PACOTINHO" alt="Pacotinho" class="w-full rounded-lg mb-2">
-      </div>
-      <div class="bg-gray-50 p-4 rounded-xl">
-        <img src="https://placehold.co/200x280/cccccc/009c3b?text=FIGURINHA+RARA" alt="Figurinha Rara" class="w-full rounded-lg mb-2">
-      </div>
-      <div class="bg-gray-50 p-4 rounded-xl">
-        <img src="https://placehold.co/200x280/cccccc/009c3b?text=ALBUM+ABERTO" alt="Album" class="w-full rounded-lg mb-2">
-      </div>
-      <div class="bg-gray-50 p-4 rounded-xl">
-        <img src="https://placehold.co/200x280/cccccc/009c3b?text=COLE%C3%87%C3%83O" alt="Colecao" class="w-full rounded-lg mb-2">
-      </div>
+<div id="tagsContainer">
+    <div class="loading">
+        <div class="spinner"></div>
+        Clique em "Gerar Etiquetas" para comeÃ§ar
     </div>
-  </div>
-</section>
-
-<!-- Benefícios Section -->
-<section class="py-16 md:py-24 bg-green-50">
-  <div class="max-w-6xl mx-auto px-4">
-    <div class="text-center mb-12">
-      <h2 class="font-bebas text-4xl md:text-5xl text-green-800 mb-4">
-        🎁 ACESSO COMPLETO AO PACK COLECIONADOR DIGITAL
-      </h2>
-      <p class="text-lg text-gray-600">Tudo que você precisa para reviver a maior emoção das Copas</p>
-    </div>
-    
-    <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-      <div class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-shadow">
-        <ul class="space-y-4">
-          <li class="flex items-start check-icon text-lg font-medium">Mais de 900 figurinhas digitais <span class="ml-auto text-green-600 font-bold">Incluso</span></li>
-          <li class="flex items-start check-icon text-lg font-medium">Álbum digital completo <span class="ml-auto text-green-600 font-bold">Incluso</span></li>
-          <li class="flex items-start check-icon text-lg font-medium">Pacotinhos personalizados <span class="ml-auto text-green-600 font-bold">Incluso</span></li>
-          <li class="flex items-start check-icon text-lg font-medium">Figurinhas raras e lendárias <span class="ml-auto text-green-600 font-bold">Incluso</span></li>
-        </ul>
-      </div>
-      <div class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-shadow">
-        <ul class="space-y-4">
-          <li class="flex items-start check-icon text-lg font-medium">Artes em alta qualidade <span class="ml-auto text-green-600 font-bold">Incluso</span></li>
-          <li class="flex items-start check-icon text-lg font-medium">Bônus exclusivos surpresa <span class="ml-auto text-green-600 font-bold">Incluso</span></li>
-          <li class="flex items-start check-icon text-lg font-medium">Atualizações futuras <span class="ml-auto text-green-600 font-bold">Incluso</span></li>
-          <li class="flex items-start check-icon text-lg font-medium">Suporte para dúvidas <span class="ml-auto text-green-600 font-bold">Incluso</span></li>
-        </ul>
-      </div>
-    </div>
-    
-    <div class="text-center mt-10">
-      <img src="https://placehold.co/800x400/ffdf00/009c3b?text=DEMONSTRA%C3%87%C3%83O+DO+%C3%81LBUM+DIGITAL+NO+CELULAR" alt="Album Digital Mockup" class="w-full max-w-3xl mx-auto rounded-2xl shadow-xl">
-    </div>
-  </div>
-</section>
-
-<!-- Você Poderá Section -->
-<section class="py-16 md:py-24 bg-white">
-  <div class="max-w-6xl mx-auto px-4">
-    <h2 class="font-bebas text-4xl md:text-5xl text-center text-green-800 mb-12">
-      ⚽ VOCÊ PODERÁ:
-    </h2>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-      <div class="bg-gradient-to-b from-green-50 to-white p-6 rounded-2xl text-center border-2 border-green-100 hover:border-green-300 transition-all hover:-translate-y-2">
-        <div class="text-4xl mb-4">🏆</div>
-        <h3 class="font-bold text-lg mb-2">Reviver a nostalgia</h3>
-        <p class="text-gray-600 text-sm">Das Copas como nos velhos tempos</p>
-      </div>
-      <div class="bg-gradient-to-b from-green-50 to-white p-6 rounded-2xl text-center border-2 border-green-100 hover:border-green-300 transition-all hover:-translate-y-2">
-        <div class="text-4xl mb-4">📱</div>
-        <h3 class="font-bold text-lg mb-2">Acessar no celular</h3>
-        <p class="text-gray-600 text-sm">Tudo na palma da sua mão, onde quiser</p>
-      </div>
-      <div class="bg-gradient-to-b from-green-50 to-white p-6 rounded-2xl text-center border-2 border-green-100 hover:border-green-300 transition-all hover:-translate-y-2">
-        <div class="text-4xl mb-4">🖨️</div>
-        <h3 class="font-bold text-lg mb-2">Imprimir quando quiser</h3>
-        <p class="text-gray-600 text-sm">Alta qualidade para colar no álbum físico</p>
-      </div>
-      <div class="bg-gradient-to-b from-green-50 to-white p-6 rounded-2xl text-center border-2 border-green-100 hover:border-green-300 transition-all hover:-translate-y-2">
-        <div class="text-4xl mb-4">👥</div>
-        <h3 class="font-bold text-lg mb-2">Compartilhar com amigos</h3>
-        <p class="text-gray-600 text-sm">Reviva a resenha de trocar figurinhas</p>
-      </div>
-      <div class="bg-gradient-to-b from-green-50 to-white p-6 rounded-2xl text-center border-2 border-green-100 hover:border-green-300 transition-all hover:-translate-y-2">
-        <div class="text-4xl mb-4">⚡</div>
-        <h3 class="font-bold text-lg mb-2">Coleção em minutos</h3>
-        <p class="text-gray-600 text-sm">Completa sem gastar fortunas na banca</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Depoimentos -->
-<section class="py-16 md:py-24 bg-yellow-50">
-  <div class="max-w-6xl mx-auto px-4">
-    <h2 class="font-bebas text-4xl md:text-5xl text-center text-green-800 mb-12">
-      🥇 QUEM JÁ GARANTIU, APROVOU
-    </h2>
-    
-    <div class="grid md:grid-cols-3 gap-6">
-      <div class="bg-white p-6 rounded-2xl shadow-lg">
-        <div class="flex items-center mb-4">
-          <div class="text-yellow-400 mr-2">★★★★★</div>
-          <span class="text-sm text-gray-500">Há 2 dias</span>
-        </div>
-        <img src="https://placehold.co/400x200/eeeeee/009c3b?text=DEPOIMENTO+WHATSAPP+1" alt="Depoimento 1" class="w-full rounded-lg mb-4">
-        <p class="text-gray-600 italic">"Cara, que nostalgia! Comprei pra mim e pro meu filho. Estamos viciados abrindo os pacotinhos digitais juntos."</p>
-        <p class="font-bold mt-3">- Carlos M.</p>
-      </div>
-      <div class="bg-white p-6 rounded-2xl shadow-lg">
-        <div class="flex items-center mb-4">
-          <div class="text-yellow-400 mr-2">★★★★★</div>
-          <span class="text-sm text-gray-500">Há 5 dias</span>
-        </div>
-        <img src="https://placehold.co/400x200/eeeeee/009c3b?text=DEPOIMENTO+WHATSAPP+2" alt="Depoimento 2" class="w-full rounded-lg mb-4">
-        <p class="text-gray-600 italic">"Imprimi todas e montei meu álbum. Qualidade absurda e por R$9,99? Valeu cada centavo!"</p>
-        <p class="font-bold mt-3">- Juliana S.</p>
-      </div>
-      <div class="bg-white p-6 rounded-2xl shadow-lg">
-        <div class="flex items-center mb-4">
-          <div class="text-yellow-400 mr-2">★★★★★</div>
-          <span class="text-sm text-gray-500">Há 1 semana</span>
-        </div>
-        <img src="https://placehold.co/400x200/eeeeee/009c3b?text=DEPOIMENTO+WHATSAPP+3" alt="Depoimento 3" class="w-full rounded-lg mb-4">
-        <p class="text-gray-600 italic">"Melhor compra do ano. Já completei tudo e ainda ganhei as atualizações. Recomendo demais."</p>
-        <p class="font-bold mt-3">- Rafael T.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Como Recebe -->
-<section class="py-16 md:py-24 bg-white">
-  <div class="max-w-5xl mx-auto px-4">
-    <h2 class="font-bebas text-4xl md:text-5xl text-center text-green-800 mb-16">
-      📦 COMO VOCÊ RECEBE SEU PACK
-    </h2>
-    
-    <div class="grid md:grid-cols-3 gap-8 relative">
-      <div class="hidden md:block absolute top-16 left-0 right-0 h-1 bg-green-200">
-        <div class="h-full w-full bg-green-500 rounded"></div>
-      </div>
-      
-      <div class="text-center relative">
-        <div class="w-20 h-20 bg-green-600 text-white rounded-full flex items-center justify-center text-3xl font-black mx-auto mb-4 shadow-lg z-10 relative">1</div>
-        <h3 class="font-bold text-xl mb-3">Clique no botão</h3>
-        <p class="text-gray-600">e finalize a compra pelo WhatsApp de forma 100% segura</p>
-      </div>
-      
-      <div class="text-center relative">
-        <div class="w-20 h-20 bg-green-600 text-white rounded-full flex items-center justify-center text-3xl font-black mx-auto mb-4 shadow-lg z-10 relative">2</div>
-        <h3 class="font-bold text-xl mb-3">Receba o acesso</h3>
-        <p class="text-gray-600">no seu e-mail ou WhatsApp em até 5 minutos após a confirmação</p>
-      </div>
-      
-      <div class="text-center relative">
-        <div class="w-20 h-20 bg-green-600 text-white rounded-full flex items-center justify-center text-3xl font-black mx-auto mb-4 shadow-lg z-10 relative">3</div>
-        <h3 class="font-bold text-xl mb-3">Abra no celular</h3>
-        <p class="text-gray-600">e comece sua coleção na hora. Simples, rápido e sem complicação!</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Comparativo -->
-<section class="py-16 md:py-24 bg-green-50">
-  <div class="max-w-4xl mx-auto px-4">
-    <h2 class="font-bebas text-4xl md:text-5xl text-center text-green-800 mb-12">
-      🤔 POR QUE ESCOLHER O PACK DIGITAL?
-    </h2>
-    
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-      <div class="grid grid-cols-2 text-center font-bold text-lg">
-        <div class="bg-red-100 text-red-700 py-4">Comprar na banca ❌</div>
-        <div class="bg-green-600 text-white py-4">Pack Digital ✅</div>
-      </div>
-      
-      <div class="divide-y divide-gray-100">
-        <div class="grid grid-cols-2 py-4 px-4">
-          <span class="text-gray-600">Gasto infinito com pacotinhos</span>
-          <span class="text-green-700 font-semibold">Investimento único de R$9,99</span>
-        </div>
-        <div class="grid grid-cols-2 py-4 px-4">
-          <span class="text-gray-600">Meses para completar</span>
-          <span class="text-green-700 font-semibold">Coleção completa em minutos</span>
-        </div>
-        <div class="grid grid-cols-2 py-4 px-4">
-          <span class="text-gray-600">Centenas de repetidas</span>
-          <span class="text-green-700 font-semibold">Zero repetida garantido</span>
-        </div>
-        <div class="grid grid-cols-2 py-4 px-4">
-          <span class="text-gray-600">Risco de perder ou rasgar</span>
-          <span class="text-green-700 font-semibold">Sempre seguro no celular</span>
-        </div>
-        <div class="grid grid-cols-2 py-4 px-4">
-          <span class="text-gray-600">Ocupa espaço físico</span>
-          <span class="text-green-700 font-semibold">Não ocupa espaço nenhum</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Oferta -->
-<section class="py-16 md:py-24 bg-gradient-to-br from-green-700 to-green-900 text-white">
-  <div class="max-w-4xl mx-auto px-4 text-center">
-    <h2 class="font-bebas text-4xl md:text-6xl mb-6">
-      🔥 HOJE VOCÊ LEVA O PACK COMPLETO POR APENAS:
-    </h2>
-    
-    <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-8 md:p-12 mb-8 border-2 border-yellow-400">
-      <p class="text-xl text-gray-200 line-through mb-2">DE R$ 49,90</p>
-      <p class="text-6xl md:text-8xl font-black text-yellow-400 mb-4">R$ 9,99</p>
-      <p class="text-2xl font-bold text-yellow-300">À VISTA</p>
-      <div class="inline-block bg-red-600 text-white px-4 py-1 rounded-full font-bold text-sm mt-4">80% DE DESCONTO</div>
-    </div>
-    
-    <div class="flex flex-wrap justify-center gap-6 mb-8 text-left">
-      <div class="flex items-center gap-3">
-        <i class="fa-solid fa-circle-check text-yellow-400 text-2xl"></i>
-        <span class="text-lg">Garantia de 7 dias</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <i class="fa-solid fa-headset text-yellow-400 text-2xl"></i>
-        <span class="text-lg">Suporte de acesso</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <i class="fa-solid fa-bolt text-yellow-400 text-2xl"></i>
-        <span class="text-lg">Acesso imediato</span>
-      </div>
-    </div>
-    
-    <a href="https://wa.me/5513988089754?text=Oi!%20Quero%20o%20Pack%20Colecionador%20Digital%20da%20Copa%20por%20R%249,99" target="_blank" class="btn-pulse inline-block bg-yellow-400 hover:bg-yellow-300 text-green-900 font-black text-xl md:text-2xl px-10 py-5 rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 mb-6">
-      QUERO MEU PACK AGORA <i class="fa-brands fa-whatsapp ml-2"></i>
-    </a>
-    
-    <p class="text-sm text-gray-200">⚠️ Promoção por tempo limitado. Preço pode voltar ao normal a qualquer momento.</p>
-    
-    <div class="flex justify-center gap-4 mt-8">
-      <img src="https://placehold.co/80x50/ffffff/000000?text=SELO+GARANTIA+7+DIAS" alt="Selo Garantia" class="h-12">
-      <img src="https://placehold.co/80x50/ffffff/000000?text=PAGAMENTO+SEGURO" alt="Selo Pagamento Seguro" class="h-12">
-      <img src="https://placehold.co/80x50/ffffff/000000?text=PIX+CART%C3%83O" alt="Pix Cartao" class="h-12">
-    </div>
-  </div>
-</section>
-
-<!-- Garantia -->
-<section class="py-16 md:py-20 bg-white">
-  <div class="max-w-4xl mx-auto px-4">
-    <div class="bg-yellow-50 border-2 border-yellow-400 rounded-2xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
-      <img src="https://placehold.co/200x200/ffffff/009c3b?text=🛡️%0A7+DIAS%0AGARANTIA" alt="Selo Garantia 7 Dias" class="w-40 h-40">
-      <div>
-        <h2 class="font-bebas text-3xl md:text-4xl text-green-800 mb-4">
-          🛡️ GARANTIA TOTAL DE 7 DIAS
-        </h2>
-        <p class="text-lg text-gray-700 leading-relaxed">
-          Seu <span class="font-bold">risco é zero</span>. Se por qualquer motivo você não amar o Pack Colecionador Digital da Copa, basta nos chamar no WhatsApp em até 7 dias e devolvemos 100% do seu dinheiro. Sem perguntas, sem burocracia.
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FAQ -->
-<section class="py-16 md:py-24 bg-gray-50">
-  <div class="max-w-3xl mx-auto px-4">
-    <h2 class="font-bebas text-4xl md:text-5xl text-center text-green-800 mb-12">
-      ❓ PERGUNTAS FREQUENTES
-    </h2>
-    
-    <div class="space-y-4" id="faq">
-      <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <button class="faq-toggle w-full text-left p-6 font-bold text-lg flex justify-between items-center hover:bg-gray-50">
-          <span>Como recebo o Pack após a compra?</span>
-          <i class="fa-solid fa-chevron-down transition-transform"></i>
-        </button>
-        <div class="faq-content hidden px-6 pb-6 text-gray-600">
-          Após a confirmação do pagamento, você recebe o link de acesso completo no seu WhatsApp e e-mail em até 5 minutos. Simples e rápido!
-        </div>
-      </div>
-      
-      <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <button class="faq-toggle w-full text-left p-6 font-bold text-lg flex justify-between items-center hover:bg-gray-50">
-          <span>Funciona no celular?</span>
-          <i class="fa-solid fa-chevron-down transition-transform"></i>
-        </button>
-        <div class="faq-content hidden px-6 pb-6 text-gray-600">
-          Sim! O Pack foi desenvolvido 100% mobile-first. Você acessa, visualiza e coleciona direto no seu celular, tablet ou computador.
-        </div>
-      </div>
-      
-      <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <button class="faq-toggle w-full text-left p-6 font-bold text-lg flex justify-between items-center hover:bg-gray-50">
-          <span>Precisa esperar entrega?</span>
-          <i class="fa-solid fa-chevron-down transition-transform"></i>
-        </button>
-        <div class="faq-content hidden px-6 pb-6 text-gray-600">
-          Não! Este é um produto 100% digital. O acesso é imediato após a compra. Nada de frete, nada de espera.
-        </div>
-      </div>
-      
-      <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <button class="faq-toggle w-full text-left p-6 font-bold text-lg flex justify-between items-center hover:bg-gray-50">
-          <span>Posso imprimir as figurinhas?</span>
-          <i class="fa-solid fa-chevron-down transition-transform"></i>
-        </button>
-        <div class="faq-content hidden px-6 pb-6 text-gray-600">
-          Com certeza! Todas as figurinhas e o álbum estão em alta resolução, prontos para impressão. Você pode montar seu álbum físico se quiser.
-        </div>
-      </div>
-      
-      <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <button class="faq-toggle w-full text-left p-6 font-bold text-lg flex justify-between items-center hover:bg-gray-50">
-          <span>Tem pagamento seguro?</span>
-          <i class="fa-solid fa-chevron-down transition-transform"></i>
-        </button>
-        <div class="faq-content hidden px-6 pb-6 text-gray-600">
-          Sim. O pagamento é processado por plataformas de segurança e você finaliza tudo pelo WhatsApp com nosso time. Seus dados estão protegidos.
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- CTA Final -->
-<section class="py-12 bg-green-800 text-white text-center">
-  <div class="max-w-4xl mx-auto px-4">
-    <h3 class="font-bebas text-3xl md:text-4xl mb-6">NÃO PERCA ESSA CHANCE DE REVIVER A EMOÇÃO!</h3>
-    <a href="https://wa.me/5513988089754?text=Oi!%20Quero%20o%20Pack%20Colecionador%20Digital%20da%20Copa%20por%20R%249,99" target="_blank" class="btn-pulse inline-block bg-yellow-400 hover:bg-yellow-300 text-green-900 font-black text-xl px-8 py-4 rounded-xl transition-all duration-300 shadow-xl">
-      GARANTIR MEU PACK POR R$9,99 <i class="fa-brands fa-whatsapp ml-2"></i>
-    </a>
-  </div>
-</section>
-
-<!-- Footer -->
-<footer class="bg-green-900 text-green-100 py-8 text-center text-sm">
-  <div class="max-w-6xl mx-auto px-4">
-    <p class="font-bold text-lg mb-2">PACK COLECIONADOR DIGITAL DA COPA</p>
-    <p class="mb-4">Produto digital com acesso imediato.</p>
-    <p class="text-green-300">© 2026 Todos os direitos reservados.</p>
-    <p class="mt-4 text-xs text-green-400">Este produto não é afiliado à FIFA, Panini ou qualquer entidade oficial. É um material de entretenimento para fãs.</p>
-  </div>
-</footer>
-
-<!-- CTA Fixo Mobile -->
-<div class="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 cta-sticky z-50">
-  <a href="https://wa.me/5513988089754?text=Oi!%20Quero%20o%20Pack%20Colecionador%20Digital%20da%20Copa%20por%20R%249,99" target="_blank" class="block w-full bg-green-600 hover:bg-green-700 text-white font-black text-center py-4 rounded-xl transition-all">
-    QUERO MEU PACK - R$9,99 <i class="fa-brands fa-whatsapp ml-2"></i>
-  </a>
 </div>
 
 <script>
-  // FAQ Accordion
-  document.querySelectorAll('.faq-toggle').forEach(button => {
-    button.addEventListener('click', () => {
-      const content = button.nextElementSibling;
-      const icon = button.querySelector('i');
-      
-      content.classList.toggle('hidden');
-      icon.classList.toggle('rotate-180');
-      
-      // Close other FAQs
-      document.querySelectorAll('.faq-content').forEach(item => {
-        if (item !== content && !item.classList.contains('hidden')) {
-          item.classList.add('hidden');
-          item.previousElementSibling.querySelector('i').classList.remove('rotate-180');
+const PHRASES = [
+    'Com Carinho', 'Feito Ã  MÃ£o', 'GratidÃ£o', 'ParabÃ©ns', 'Para VocÃª', 
+    'Muito Obrigada', 'Presente Especial', 'VocÃª Ã© Especial', 'Com Amor', 
+    'Momento Especial', 'Doce Mimo', 'Um Agrado', 'Feito com Amor', 
+    'Produto Natural', 'Artesanal', 'Um Mimo pra VocÃª', 'Especialmente pra Ti', 
+    'Lembrancinha', 'Com Afeto'
+];
+
+const STYLES = [
+    'rustic', 'floral', 'minimalist', 'boho', 'luxury', 
+    'pastel', 'geometric', 'vintage', 'natal', 'infantil', 
+    'botanico', 'kawaii', 'lettering', 'aquarela', 'kraft'
+];
+
+const COLORS = ['blush', 'lavanda', 'menta', 'azul', 'dourado', 'kraft', 'preto', 'verde', 'coral', 'terracota'];
+
+function getRandomItem(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function getTagsPerPage(size) {
+    if (size === '45') return 6 * 8; // 6 colunas x 8 linhas = 48
+    if (size === '50') return 5 * 7; // 5 colunas x 7 linhas = 35  
+    if (size === '55') return 4 * 6; // 4 colunas x 6 linhas = 24
+    return 35;
+}
+
+function createTag(size, styleFilter) {
+    const style = styleFilter === 'all' ? getRandomItem(STYLES) : styleFilter;
+    const phrase = getRandomItem(PHRASES);
+    const color = getRandomItem(COLORS);
+    
+    const tag = document.createElement('div');
+    tag.className = `tag size-${size} style-${style}`;
+    tag.setAttribute('data-color', color);
+    tag.innerHTML = `
+        <div class="tag-hole"></div>
+        <div class="tag-content">
+            <div class="tag-text">${phrase}</div>
+        </div>
+    `;
+    return tag;
+}
+
+function generateTags() {
+    const container = document.getElementById('tagsContainer');
+    const size = document.getElementById('sizeSelect').value;
+    const quantity = parseInt(document.getElementById('quantitySelect').value);
+    const styleFilter = document.getElementById('styleFilter').value;
+    
+    container.innerHTML = '<div class="loading"><div class="spinner"></div>Gerando ' + quantity + ' etiquetas...</div>';
+    
+    setTimeout(() => {
+        container.innerHTML = '';
+        const tagsPerPage = getTagsPerPage(size);
+        const totalPages = Math.ceil(quantity / tagsPerPage);
+        
+        document.getElementById('pageCount').textContent = `ð PÃ¡ginas: ${totalPages}`;
+        
+        let tagCount = 0;
+        
+        for (let p = 0; p < totalPages; p++) {
+            const page = document.createElement('div');
+            page.className = 'page';
+            
+            const grid = document.createElement('div');
+            grid.className = `tags-grid size-${size}`;
+            
+            const tagsThisPage = Math.min(tagsPerPage, quantity - tagCount);
+            
+            for (let i = 0; i < tagsThisPage; i++) {
+                grid.appendChild(createTag(size, styleFilter));
+                tagCount++;
+            }
+            
+            page.appendChild(grid);
+            container.appendChild(page);
         }
-      });
-    });
-  });
+        
+        window.scrollTo({ top: document.querySelector('#tagsContainer').offsetTop - 20, behavior: 'smooth' });
+    }, 100);
+}
 
-  // Smooth scroll for anchor links
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
-    });
-  });
+function downloadInstructions() {
+    const instructions = `
+INSTRUÃÃES COMPLETAS - ETIQUETAS MIMO REDONDAS
+===============================================
+
+MATERIAIS RECOMENDADOS:
+- Papel CouchÃª 180g a 300g (acabamento fosco ou brilhante)
+- Papel Adesivo VinÃ­lico (para etiquetas que colam)
+- Papel Kraft 180g (para estilo rÃºstico)
+- Tesoura de precisÃ£o ou estilete
+- Furador de papel 3mm (opcional)
+- Cortador circular ou mÃ¡quina Cricut (opcional)
+
+CONFIGURAÃÃO DE IMPRESSÃO:
+1. Abra o arquivo no navegador (Chrome/Edge recomendado)
+2. Pressione Ctrl+P ou clique em "Imprimir"
+3. Selecione "Salvar como PDF" ou sua impressora
+4. IMPORTANTE: Defina escala como "100%" ou "Tamanho real"
+5. Desative "Ajustar Ã  pÃ¡gina" e "CabeÃ§alhos/RodapÃ©s"
+6. Margens: MÃ­nimas ou Nenhuma
+7. OrientaÃ§Ã£o: Retrato
+8. Qualidade: Alta ou Melhor
+
+TAMANHOS DISPONÃVEIS:
+- 4,5cm: 6 etiquetas por linha, ~48 por pÃ¡gina A4
+- 5,0cm: 5 etiquetas por linha, ~35 por pÃ¡gina A4  
+- 5,5cm: 4 etiquetas por linha, ~24 por pÃ¡gina A4
+
+DICAS DE CORTE:
+- Use tesoura de ponta fina para curvas perfeitas
+- Cortadores circulares de scrapbook facilitam o trabalho
+- MÃ¡quinas Cricut/Silhouette: configure para papel 180g
+- Deixe 2mm de margem ao redor se for perfurar
+
+ACABAMENTO:
+- PlastificaÃ§Ã£o: use plÃ¡stico 125 micras para maior durabilidade
+- Verniz: aplique spray fosco para proteger a impressÃ£o
+- Furo: use furador 3mm no ponto marcado no topo
+- Fita: passe fita cetim, juta ou barbante pelo furo
+
+ESTILOS INCLUSOS: RÃºstico, Floral, Minimalista, Boho, Luxury, 
+Pastel, GeomÃ©trico, Vintage, Natal, Infantil, BotÃ¢nico, 
+Kawaii, Lettering, Aquarela, Kraft
+
+FRASES: 19 variaÃ§Ãµes em portuguÃªs para todos os tipos de presente
+
+DÃºvidas? Teste a impressÃ£o em papel comum primeiro antes de 
+usar o papel final para garantir que o tamanho estÃ¡ correto.
+
+Gerado em: ${new Date().toLocaleDateString('pt-BR')}
+`;
+    
+    const blob = new Blob([instructions], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Instrucoes_Etiquetas_Mimo.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Gera etiquetas ao carregar
+window.addEventListener('load', () => {
+    setTimeout(generateTags, 500);
+});
+
+// Atualiza contagem ao mudar tamanho
+document.getElementById('sizeSelect').addEventListener('change', () => {
+    const size = document.getElementById('sizeSelect').value;
+    const quantity = parseInt(document.getElementById('quantitySelect').value);
+    const tagsPerPage = getTagsPerPage(size);
+    const totalPages = Math.ceil(quantity / tagsPerPage);
+    document.getElementById('pageCount').textContent = `ð PÃ¡ginas: ${totalPages}`;
+});
 </script>
-
+<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
 </body>
 </html>
