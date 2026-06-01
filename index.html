@@ -1,2 +1,1388 @@
-crie um sistema gerador de album de fotos digitais. Neste album vou fazer dois tipos de configurações, A4 e A5. Neste álbum vou colocar fotos de tamanhos variados, 6x10 , 10x15x, 15x18 e 18x26. quero que coloque uma opção de upload e ajustes as imagens no local, sem alterar suas qualidade e propriedade. Quero que dê opção de personalizar a capa , fotos e contra capa, algo extremamente profissional e fácil e fazer e elaborar.
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhotoBook Pro - Gerador de Álbum de Fotos Digital</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- CDN funcional: UMD builds que expõem window.jspdf e window.html2canvas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+    
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .font-serif {
+        font-family: 'Playfair Display', serif;
+    }
+    
+    .canvas-page {
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        background: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .photo-item {
+        position: absolute;
+        cursor: move;
+        border: 2px solid transparent;
+        transition: border 0.2s;
+    }
+    
+    .photo-item:hover, .photo-item.selected {
+        border: 2px solid #3b82f6;
+        z-index: 100;
+    }
+    
+    .photo-item.selected .resize-handle {
+        display: block;
+    }
+    
+    .resize-handle {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background: #3b82f6;
+        border: 2px solid white;
+        border-radius: 50%;
+        display: none;
+        z-index: 101;
+    }
+    
+    .resize-handle.nw { top: -6px; left: -6px; cursor: nw-resize; }
+    .resize-handle.ne { top: -6px; right: -6px; cursor: ne-resize; }
+    .resize-handle.sw { bottom: -6px; left: -6px; cursor: sw-resize; }
+    .resize-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
+    
+    .rotate-handle {
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 24px;
+        height: 24px;
+        background: #10b981;
+        border: 2px solid white;
+        border-radius: 50%;
+        display: none;
+        cursor: grab;
+        z-index: 101;
+    }
+    
+    .photo-item.selected .rotate-handle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .grid-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        background-image: 
+            repeating-linear-gradient(0deg, rgba(59,130,246,0.1) 0px, transparent 1px, transparent 19px, rgba(59,130,246,0.1) 20px),
+            repeating-linear-gradient(90deg, rgba(59,130,246,0.1) 0px, transparent 1px, transparent 19px, rgba(59,130,246,0.1) 20px);
+    }
+    
+    .bleed-guide {
+        position: absolute;
+        pointer-events: none;
+        border: 1px dashed rgba(239,68,68,0.4);
+    }
+    
+    .margin-guide {
+        position: absolute;
+        pointer-events: none;
+        border: 1px dashed rgba(16,185,129,0.4);
+    }
+    
+    .text-item {
+        position: absolute;
+        cursor: move;
+        padding: 8px;
+        min-width: 50px;
+        min-height: 30px;
+        border: 2px solid transparent;
+    }
+    
+    .text-item:hover, .text-item.selected {
+        border: 2px dashed #8b5cf6;
+        z-index: 100;
+    }
+    
+    .text-item:focus {
+        outline: none;
+    }
+    
+    .thumbnail {
+        transition: all 0.2s;
+    }
+    
+    .thumbnail:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .thumbnail.active {
+        border: 3px solid #3b82f6;
+    }
+    
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+    
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .canvas-page, .canvas-page * {
+            visibility: visible;
+        }
+        .canvas-page {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    }
+</style>
+</head>
+<body class="bg-slate-50 h-screen overflow-hidden flex flex-col">
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <i data-lucide="book-image" class="w-6 h-6 text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">PhotoBook Pro</h1>
+                <p class="text-xs text-slate-500">Gerador de Álbum Profissional</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <button id="btnNewProject" class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition">
+                <i data-lucide="file-plus" class="w-4 h-4 inline mr-1"></i>
+                Novo
+            </button>
+            <button id="btnSaveProject" class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition">
+                <i data-lucide="save" class="w-4 h-4 inline mr-1"></i>
+                Salvar
+            </button>
+            <button id="btnLoadProject" class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition">
+                <i data-lucide="folder-open" class="w-4 h-4 inline mr-1"></i>
+                Abrir
+            </button>
+            <input type="file" id="loadProjectInput" accept=".json" class="hidden">
+            <div class="w-px h-6 bg-slate-300 mx-2"></div>
+            <button id="btnExportPDF" class="px-5 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition">
+                <i data-lucide="download" class="w-4 h-4 inline mr-1"></i>
+                Exportar PDF
+            </button>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Sidebar Esquerda -->
+        <aside class="w-80 bg-white border-r border-slate-200 flex flex-col overflow-hidden">
+            <!-- Tabs -->
+            <div class="flex border-b border-slate-200">
+                <button class="tab-btn flex-1 px-4 py-3 text-sm font-medium border-b-2 border-blue-600 text-blue-600" data-tab="formatos">
+                    Formatos
+                </button>
+                <button class="tab-btn flex-1 px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700" data-tab="fotos">
+                    Fotos
+                </button>
+                <button class="tab-btn flex-1 px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700" data-tab="estilo">
+                    Estilo
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="flex-1 overflow-y-auto p-4">
+                <!-- Tab Formatos -->
+                <div id="tab-formatos" class="tab-content">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-3">Formato do Álbum</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button class="format-btn px-4 py-3 border-2 border-blue-600 bg-blue-50 rounded-lg text-sm font-medium text-blue-700" data-format="A4">
+                                    A4<br><span class="text-xs opacity-70">210x297mm</span>
+                                </button>
+                                <button class="format-btn px-4 py-3 border-2 border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:border-slate-400" data-format="A5">
+                                    A5<br><span class="text-xs opacity-70">148x210mm</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-3">Orientação</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button class="orientation-btn px-4 py-3 border-2 border-blue-600 bg-blue-50 rounded-lg text-sm font-medium text-blue-700" data-orientation="portrait">
+                                    <i data-lucide="rectangle-vertical" class="w-4 h-4 mx-auto mb-1"></i>
+                                    Retrato
+                                </button>
+                                <button class="orientation-btn px-4 py-3 border-2 border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:border-slate-400" data-orientation="landscape">
+                                    <i data-lucide="rectangle-horizontal" class="w-4 h-4 mx-auto mb-1"></i>
+                                    Paisagem
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-3">Tamanho de Foto</label>
+                            <div class="space-y-2">
+                                <button class="photo-size-btn w-full px-4 py-2 border-2 border-blue-600 bg-blue-50 rounded-lg text-sm font-medium text-blue-700 text-left" data-size="6x10">
+                                    6x10cm - Cartão
+                                </button>
+                                <button class="photo-size-btn w-full px-4 py-2 border-2 border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:border-slate-400 text-left" data-size="10x15">
+                                    10x15cm - Padrão
+                                </button>
+                                <button class="photo-size-btn w-full px-4 py-2 border-2 border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:border-slate-400 text-left" data-size="15x18">
+                                    15x18cm - Médio
+                                </button>
+                                <button class="photo-size-btn w-full px-4 py-2 border-2 border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:border-slate-400 text-left" data-size="18x26">
+                                    18x26cm - Grande
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-200 pt-4">
+                            <label class="flex items-center gap-2 text-sm font-medium text-slate-700 mb-3">
+                                <input type="checkbox" id="showGrid" class="w-4 h-4 text-blue-600 rounded">
+                                Mostrar grade de alinhamento
+                            </label>
+                            <label class="flex items-center gap-2 text-sm font-medium text-slate-700 mb-3">
+                                <input type="checkbox" id="snapToGrid" checked class="w-4 h-4 text-blue-600 rounded">
+                                Alinhar à grade
+                            </label>
+                            <label class="flex items-center gap-2 text-sm font-medium text-slate-700">
+                                <input type="checkbox" id="showGuides" checked class="w-4 h-4 text-blue-600 rounded">
+                                Guias de margem e sangria
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Fotos -->
+                <div id="tab-fotos" class="tab-content hidden">
+                    <div class="space-y-4">
+                        <div id="dropZone" class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer">
+                            <i data-lucide="upload-cloud" class="w-12 h-12 mx-auto mb-3 text-slate-400"></i>
+                            <p class="text-sm font-medium text-slate-700 mb-1">Arraste imagens aqui</p>
+                            <p class="text-xs text-slate-500 mb-3">ou clique para selecionar</p>
+                            <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
+                            <button class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+                                Selecionar Fotos
+                            </button>
+                        </div>
+
+                        <div id="photosList" class="grid grid-cols-2 gap-3">
+                            <!-- Fotos carregadas aparecem aqui -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Estilo -->
+                <div id="tab-estilo" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Cor de Fundo da Página</label>
+                            <input type="color" id="bgColor" value="#ffffff" class="w-full h-10 rounded-lg cursor-pointer">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Margem (mm)</label>
+                            <input type="range" id="marginSize" min="0" max="30" value="10" class="w-full">
+                            <div class="flex justify-between text-xs text-slate-500 mt-1">
+                                <span>0mm</span>
+                                <span id="marginValue">10mm</span>
+                                <span>30mm</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Sangria (mm)</label>
+                            <input type="range" id="bleedSize" min="0" max="10" value="3" class="w-full">
+                            <div class="flex justify-between text-xs text-slate-500 mt-1">
+                                <span>0mm</span>
+                                <span id="bleedValue">3mm</span>
+                                <span>10mm</span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-200 pt-4">
+                            <button id="btnAddText" class="w-full px-4 py-3 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition">
+                                <i data-lucide="type" class="w-4 h-4 inline mr-1"></i>
+                                Adicionar Texto
+                            </button>
+                        </div>
+
+                        <div id="textEditor" class="hidden border-t border-slate-200 pt-4 space-y-3">
+                            <label class="block text-sm font-semibold text-slate-700">Editor de Texto</label>
+                            <input type="text" id="textContent" placeholder="Digite seu texto" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                            <select id="textFont" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                                <option value="Inter">Inter</option>
+                                <option value="Playfair Display">Playfair Display</option>
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                            </select>
+                            <div class="flex gap-2">
+                                <input type="number" id="textSize" value="24" min="8" max="120" class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                                <input type="color" id="textColor" value="#000000" class="w-20 h-10 rounded-lg cursor-pointer">
+                            </div>
+                            <div class="flex gap-2">
+                                <button id="textBold" class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm font-bold">B</button>
+                                <button id="textItalic" class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm italic">I</button>
+                                <button id="textAlign" class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm" data-align="left">
+                                    <i data-lucide="align-left" class="w-4 h-4 mx-auto"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Área Central - Canvas -->
+        <main class="flex-1 bg-slate-100 overflow-auto p-8 flex flex-col items-center">
+            <div class="mb-4 flex items-center gap-2">
+                <button id="btnPrevPage" class="px-3 py-2 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                </button>
+                <span class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700">
+                    Página <span id="currentPageNum">1</span> de <span id="totalPages">1</span>
+                </span>
+                <button id="btnNextPage" class="px-3 py-2 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </button>
+                <div class="w-px h-6 bg-slate-300 mx-2"></div>
+                <button id="btnNewPage" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
+                    Nova Página
+                </button>
+                <button id="btnDuplicatePage" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    <i data-lucide="copy" class="w-4 h-4 inline mr-1"></i>
+                    Duplicar
+                </button>
+                <button id="btnDeletePage" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50">
+                    <i data-lucide="trash-2" class="w-4 h-4 inline mr-1"></i>
+                    Deletar
+                </button>
+            </div>
+
+            <div id="canvasContainer" class="canvas-page" style="width: 794px; height: 1123px;">
+                <div id="gridOverlay" class="grid-overlay hidden"></div>
+                <div id="bleedGuide" class="bleed-guide hidden"></div>
+                <div id="marginGuide" class="margin-guide hidden"></div>
+            </div>
+
+            <div class="mt-6 flex items-center gap-3">
+                <button id="zoomOut" class="px-3 py-2 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
+                    <i data-lucide="zoom-out" class="w-4 h-4"></i>
+                </button>
+                <span class="text-sm font-medium text-slate-700 w-16 text-center" id="zoomLevel">100%</span>
+                <button id="zoomIn" class="px-3 py-2 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
+                    <i data-lucide="zoom-in" class="w-4 h-4"></i>
+                </button>
+                <button id="zoomFit" class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    Ajustar
+                </button>
+            </div>
+        </main>
+
+        <!-- Sidebar Direita - Miniaturas -->
+        <aside class="w-56 bg-white border-l border-slate-200 p-4 overflow-y-auto">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">Páginas</h3>
+            <div id="thumbnailsList" class="space-y-3">
+                <!-- Miniaturas das páginas -->
+            </div>
+        </aside>
+    </div>
+
+    <!-- Modal de Exportação -->
+    <div id="exportModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <h2 class="text-2xl font-bold text-slate-800 mb-4">Exportar Álbum</h2>
+            <div id="exportProgress" class="space-y-4">
+                <div class="text-sm text-slate-600">Preparando páginas em alta resolução 300 DPI...</div>
+                <div class="w-full bg-slate-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div class="text-xs text-slate-500" id="progressText">Página 0 de 0</div>
+            </div>
+            <div id="exportComplete" class="hidden text-center">
+                <i data-lucide="check-circle" class="w-16 h-16 mx-auto mb-4 text-green-500"></i>
+                <p class="text-lg font-semibold text-slate-800 mb-2">PDF Gerado com Sucesso!</p>
+                <p class="text-sm text-slate-600 mb-6">Seu álbum está pronto para impressão profissional.</p>
+                <button id="closeModal" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Erro CDN -->
+    <div id="errorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <i data-lucide="alert-triangle" class="w-16 h-16 mx-auto mb-4 text-red-500"></i>
+            <h2 class="text-xl font-bold text-slate-800 mb-2 text-center">Erro ao Carregar Biblioteca</h2>
+            <p class="text-sm text-slate-600 mb-6 text-center">Não foi possível carregar as bibliotecas de exportação. Verifique sua conexão com a internet e recarregue a página.</p>
+            <button id="reloadPage" class="w-full px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700">Recarregar Página</button>
+        </div>
+    </div>
+
+<script>
+    // Estado global do aplicativo
+    const state = {
+        format: 'A4',
+        orientation: 'portrait',
+        photoSize: '6x10',
+        currentPage: 0,
+        pages: [{ photos: [], texts: [], bgColor: '#ffffff' }],
+        selectedItem: null,
+        zoom: 1,
+        margin: 10,
+        bleed: 3,
+        showGrid: false,
+        snapToGrid: true,
+        showGuides: true,
+        gridSize: 20,
+        photos: [],
+        textAlignOptions: ['left', 'center', 'right'],
+        currentTextAlign: 0
+    };
+
+    // Constantes de dimensões em pixels a 96 DPI
+    const MM_TO_PX = 3.7795275591;
+    const formats = {
+        A4: { width: 210 * MM_TO_PX, height: 297 * MM_TO_PX },
+        A5: { width: 148 * MM_TO_PX, height: 210 * MM_TO_PX }
+    };
+    
+    const photoSizes = {
+        '6x10': { width: 60 * MM_TO_PX, height: 100 * MM_TO_PX },
+        '10x15': { width: 100 * MM_TO_PX, height: 150 * MM_TO_PX },
+        '15x18': { width: 150 * MM_TO_PX, height: 180 * MM_TO_PX },
+        '18x26': { width: 180 * MM_TO_PX, height: 260 * MM_TO_PX }
+    };
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+        initEventListeners();
+        updateCanvasSize();
+        updateGuides();
+        renderThumbnails();
+        
+        // Verificar se jsPDF carregou - correção do erro Cannot destructure
+        setTimeout(() => {
+            if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
+                console.error('Erro: Bibliotecas não carregaram');
+                showErrorModal();
+            }
+        }, 1000);
+    });
+
+    function initEventListeners() {
+        // Tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => switchTab(e.target.dataset.tab));
+        });
+
+        // Formato e orientação
+        document.querySelectorAll('.format-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                state.format = e.currentTarget.dataset.format;
+                updateFormatButtons();
+                updateCanvasSize();
+            });
+        });
+
+        document.querySelectorAll('.orientation-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                state.orientation = e.currentTarget.dataset.orientation;
+                updateOrientationButtons();
+                updateCanvasSize();
+            });
+        });
+
+        document.querySelectorAll('.photo-size-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                state.photoSize = e.currentTarget.dataset.size;
+                updatePhotoSizeButtons();
+            });
+        });
+
+        // Upload de fotos
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-blue-400', 'bg-blue-50');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-blue-400', 'bg-blue-50');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-400', 'bg-blue-50');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        // Controles de página
+        document.getElementById('btnNewPage').addEventListener('click', addNewPage);
+        document.getElementById('btnDuplicatePage').addEventListener('click', duplicatePage);
+        document.getElementById('btnDeletePage').addEventListener('click', deletePage);
+        document.getElementById('btnPrevPage').addEventListener('click', prevPage);
+        document.getElementById('btnNextPage').addEventListener('click', nextPage);
+
+        // Zoom
+        document.getElementById('zoomIn').addEventListener('click', () => adjustZoom(0.1));
+        document.getElementById('zoomOut').addEventListener('click', () => adjustZoom(-0.1));
+        document.getElementById('zoomFit').addEventListener('click', fitToScreen);
+
+        // Configurações
+        document.getElementById('showGrid').addEventListener('change', (e) => {
+            state.showGrid = e.target.checked;
+            document.getElementById('gridOverlay').classList.toggle('hidden', !state.showGrid);
+        });
+        
+        document.getElementById('snapToGrid').addEventListener('change', (e) => {
+            state.snapToGrid = e.target.checked;
+        });
+        
+        document.getElementById('showGuides').addEventListener('change', (e) => {
+            state.showGuides = e.target.checked;
+            updateGuides();
+        });
+
+        document.getElementById('bgColor').addEventListener('input', (e) => {
+            state.pages[state.currentPage].bgColor = e.target.value;
+            document.getElementById('canvasContainer').style.backgroundColor = e.target.value;
+        });
+
+        document.getElementById('marginSize').addEventListener('input', (e) => {
+            state.margin = parseInt(e.target.value);
+            document.getElementById('marginValue').textContent = state.margin + 'mm';
+            updateGuides();
+        });
+
+        document.getElementById('bleedSize').addEventListener('input', (e) => {
+            state.bleed = parseInt(e.target.value);
+            document.getElementById('bleedValue').textContent = state.bleed + 'mm';
+            updateGuides();
+        });
+
+        // Texto
+        document.getElementById('btnAddText').addEventListener('click', addText);
+        document.getElementById('textContent').addEventListener('input', updateSelectedText);
+        document.getElementById('textFont').addEventListener('change', updateSelectedText);
+        document.getElementById('textSize').addEventListener('input', updateSelectedText);
+        document.getElementById('textColor').addEventListener('input', updateSelectedText);
+        document.getElementById('textBold').addEventListener('click', toggleBold);
+        document.getElementById('textItalic').addEventListener('click', toggleItalic);
+        document.getElementById('textAlign').addEventListener('click', cycleTextAlign);
+
+        // Projeto
+        document.getElementById('btnNewProject').addEventListener('click', newProject);
+        document.getElementById('btnSaveProject').addEventListener('click', saveProject);
+        document.getElementById('btnLoadProject').addEventListener('click', () => document.getElementById('loadProjectInput').click());
+        document.getElementById('loadProjectInput').addEventListener('change', loadProject);
+
+        // Export
+        document.getElementById('btnExportPDF').addEventListener('click', exportPDF);
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('exportModal').classList.add('hidden');
+        });
+        document.getElementById('reloadPage').addEventListener('click', () => location.reload());
+
+        // Canvas click para desselecionar
+        document.getElementById('canvasContainer').addEventListener('click', (e) => {
+            if (e.target.id === 'canvasContainer' || e.target.classList.contains('grid-overlay')) {
+                deselectAll();
+            }
+        });
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('border-blue-600', 'text-blue-600');
+            btn.classList.add('border-transparent', 'text-slate-500');
+        });
+        document.querySelector(`[data-tab="${tab}"]`).classList.add('border-blue-600', 'text-blue-600');
+        document.querySelector(`[data-tab="${tab}"]`).classList.remove('border-transparent', 'text-slate-500');
+
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+        document.getElementById(`tab-${tab}`).classList.remove('hidden');
+    }
+
+    function updateFormatButtons() {
+        document.querySelectorAll('.format-btn').forEach(btn => {
+            if (btn.dataset.format === state.format) {
+                btn.classList.add('border-blue-600', 'bg-blue-50', 'text-blue-700');
+                btn.classList.remove('border-slate-300', 'text-slate-700');
+            } else {
+                btn.classList.remove('border-blue-600', 'bg-blue-50', 'text-blue-700');
+                btn.classList.add('border-slate-300', 'text-slate-700');
+            }
+        });
+    }
+
+    function updateOrientationButtons() {
+        document.querySelectorAll('.orientation-btn').forEach(btn => {
+            if (btn.dataset.orientation === state.orientation) {
+                btn.classList.add('border-blue-600', 'bg-blue-50', 'text-blue-700');
+                btn.classList.remove('border-slate-300', 'text-slate-700');
+            } else {
+                btn.classList.remove('border-blue-600', 'bg-blue-50', 'text-blue-700');
+                btn.classList.add('border-slate-300', 'text-slate-700');
+            }
+        });
+    }
+
+    function updatePhotoSizeButtons() {
+        document.querySelectorAll('.photo-size-btn').forEach(btn => {
+            if (btn.dataset.size === state.photoSize) {
+                btn.classList.add('border-blue-600', 'bg-blue-50', 'text-blue-700');
+                btn.classList.remove('border-slate-300', 'text-slate-700');
+            } else {
+                btn.classList.remove('border-blue-600', 'bg-blue-50', 'text-blue-700');
+                btn.classList.add('border-slate-300', 'text-slate-700');
+            }
+        });
+    }
+
+    function updateCanvasSize() {
+        const canvas = document.getElementById('canvasContainer');
+        let width = formats[state.format].width;
+        let height = formats[state.format].height;
+        
+        if (state.orientation === 'landscape') {
+            [width, height] = [height, width];
+        }
+        
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        updateGuides();
+        renderCurrentPage();
+    }
+
+    function updateGuides() {
+        const bleedGuide = document.getElementById('bleedGuide');
+        const marginGuide = document.getElementById('marginGuide');
+        
+        if (state.showGuides) {
+            const bleedPx = state.bleed * MM_TO_PX;
+            const marginPx = state.margin * MM_TO_PX;
+            
+            bleedGuide.style.display = 'block';
+            bleedGuide.style.top = bleedPx + 'px';
+            bleedGuide.style.left = bleedPx + 'px';
+            bleedGuide.style.right = bleedPx + 'px';
+            bleedGuide.style.bottom = bleedPx + 'px';
+            
+            marginGuide.style.display = 'block';
+            marginGuide.style.top = (bleedPx + marginPx) + 'px';
+            marginGuide.style.left = (bleedPx + marginPx) + 'px';
+            marginGuide.style.right = (bleedPx + marginPx) + 'px';
+            marginGuide.style.bottom = (bleedPx + marginPx) + 'px';
+        } else {
+            bleedGuide.style.display = 'none';
+            marginGuide.style.display = 'none';
+        }
+    }
+
+    function handleFileSelect(e) {
+        handleFiles(e.target.files);
+    }
+
+    function handleFiles(files) {
+        Array.from(files).forEach(file => {
+            if (!file.type.startsWith('image/')) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const photo = {
+                        id: Date.now() + Math.random(),
+                        src: e.target.result,
+                        name: file.name,
+                        width: img.width,
+                        height: img.height,
+                        aspectRatio: img.width / img.height
+                    };
+                    state.photos.push(photo);
+                    addPhotoThumbnail(photo);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function addPhotoThumbnail(photo) {
+        const list = document.getElementById('photosList');
+        const div = document.createElement('div');
+        div.className = 'thumbnail border-2 border-slate-200 rounded-lg overflow-hidden cursor-pointer hover:border-blue-400';
+        div.innerHTML = `
+            <img src="${photo.src}" alt="${photo.name}" class="w-full h-24 object-cover" draggable="true">
+            <div class="p-2 bg-white">
+                <p class="text-xs text-slate-600 truncate">${photo.name}</p>
+            </div>
+        `;
+        
+        div.querySelector('img').addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('photoId', photo.id);
+        });
+        
+        div.addEventListener('click', () => addPhotoToCanvas(photo));
+        list.appendChild(div);
+    }
+
+    // Canvas drag and drop
+    document.getElementById('canvasContainer').addEventListener('dragover', (e) => {
+        e.preventDefault();
+    });
+
+    document.getElementById('canvasContainer').addEventListener('drop', (e) => {
+        e.preventDefault();
+        const photoId = e.dataTransfer.getData('photoId');
+        const photo = state.photos.find(p => p.id == photoId);
+        if (photo) {
+            const rect = document.getElementById('canvasContainer').getBoundingClientRect();
+            const x = (e.clientX - rect.left) / state.zoom;
+            const y = (e.clientY - rect.top) / state.zoom;
+            addPhotoToCanvas(photo, x, y);
+        }
+    });
+
+    function addPhotoToCanvas(photo, x = 50, y = 50) {
+        const size = photoSizes[state.photoSize];
+        const photoEl = {
+            id: Date.now() + Math.random(),
+            photoId: photo.id,
+            src: photo.src,
+            x: snapToGridValue(x),
+            y: snapToGridValue(y),
+            width: size.width,
+            height: size.height,
+            rotation: 0,
+            maintainAspectRatio: true,
+            aspectRatio: photo.aspectRatio
+        };
+        
+        state.pages[state.currentPage].photos.push(photoEl);
+        renderCurrentPage();
+    }
+
+    function addText() {
+        const textEl = {
+            id: Date.now() + Math.random(),
+            content: 'Clique para editar',
+            x: 50,
+            y: 50,
+            fontSize: 24,
+            fontFamily: 'Inter',
+            color: '#000000',
+            bold: false,
+            italic: false,
+            align: 'left',
+            width: 200
+        };
+        
+        state.pages[state.currentPage].texts.push(textEl);
+        renderCurrentPage();
+        selectText(textEl.id);
+    }
+
+    function renderCurrentPage() {
+        const canvas = document.getElementById('canvasContainer');
+        const page = state.pages[state.currentPage];
+        
+        // Limpar canvas exceto guias
+        canvas.querySelectorAll('.photo-item, .text-item').forEach(el => el.remove());
+        
+        canvas.style.backgroundColor = page.bgColor;
+        
+        // Renderizar fotos
+        page.photos.forEach(photo => {
+            const div = document.createElement('div');
+            div.className = 'photo-item';
+            div.dataset.id = photo.id;
+            div.dataset.type = 'photo';
+            div.style.left = photo.x + 'px';
+            div.style.top = photo.y + 'px';
+            div.style.width = photo.width + 'px';
+            div.style.height = photo.height + 'px';
+            div.style.transform = `rotate(${photo.rotation}deg)`;
+            
+            div.innerHTML = `
+                <img src="${photo.src}" class="w-full h-full object-cover" draggable="false">
+                <div class="resize-handle nw"></div>
+                <div class="resize-handle ne"></div>
+                <div class="resize-handle sw"></div>
+                <div class="resize-handle se"></div>
+                <div class="rotate-handle">
+                    <i data-lucide="rotate-cw" class="w-3 h-3 text-white"></i>
+                </div>
+            `;
+            
+            makeDraggable(div, photo);
+            makeResizable(div, photo);
+            makeRotatable(div, photo);
+            
+            div.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectItem(photo.id, 'photo');
+            });
+            
+            canvas.appendChild(div);
+        });
+        
+        // Renderizar textos
+        page.texts.forEach(text => {
+            const div = document.createElement('div');
+            div.className = 'text-item';
+            div.dataset.id = text.id;
+            div.dataset.type = 'text';
+            div.contentEditable = false;
+            div.style.left = text.x + 'px';
+            div.style.top = text.y + 'px';
+            div.style.fontSize = text.fontSize + 'px';
+            div.style.fontFamily = text.fontFamily;
+            div.style.color = text.color;
+            div.style.fontWeight = text.bold ? 'bold' : 'normal';
+            div.style.fontStyle = text.italic ? 'italic' : 'normal';
+            div.style.textAlign = text.align;
+            div.style.width = text.width + 'px';
+            div.textContent = text.content;
+            
+            makeDraggable(div, text);
+            
+            div.addEventListener('dblclick', () => {
+                div.contentEditable = true;
+                div.focus();
+            });
+            
+            div.addEventListener('blur', () => {
+                div.contentEditable = false;
+                text.content = div.textContent;
+            });
+            
+            div.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectText(text.id);
+            });
+            
+            canvas.appendChild(div);
+        });
+        
+        lucide.createIcons();
+        updateThumbnails();
+    }
+
+    function makeDraggable(element, item) {
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+        
+        element.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('resize-handle') || e.target.classList.contains('rotate-handle')) return;
+            
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            initialX = item.x;
+            initialY = item.y;
+            element.style.zIndex = 1000;
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const dx = (e.clientX - startX) / state.zoom;
+            const dy = (e.clientY - startY) / state.zoom;
+            
+            item.x = snapToGridValue(initialX + dx);
+            item.y = snapToGridValue(initialY + dy);
+            
+            element.style.left = item.x + 'px';
+            element.style.top = item.y + 'px';
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                element.style.zIndex = '';
+            }
+        });
+    }
+
+    function makeResizable(element, photo) {
+        const handles = element.querySelectorAll('.resize-handle');
+        let isResizing = false;
+        let currentHandle = null;
+        let startX, startY, startWidth, startHeight, startLeft, startTop;
+        
+        handles.forEach(handle => {
+            handle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                isResizing = true;
+                currentHandle = handle;
+                startX = e.clientX;
+                startY = e.clientY;
+                startWidth = photo.width;
+                startHeight = photo.height;
+                startLeft = photo.x;
+                startTop = photo.y;
+            });
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            
+            const dx = (e.clientX - startX) / state.zoom;
+            const dy = (e.clientY - startY) / state.zoom;
+            
+            if (currentHandle.classList.contains('se')) {
+                photo.width = Math.max(50, snapToGridValue(startWidth + dx));
+                if (photo.maintainAspectRatio) {
+                    photo.height = photo.width / photo.aspectRatio;
+                } else {
+                    photo.height = Math.max(50, snapToGridValue(startHeight + dy));
+                }
+            } else if (currentHandle.classList.contains('sw')) {
+                photo.width = Math.max(50, snapToGridValue(startWidth - dx));
+                photo.x = snapToGridValue(startLeft + dx);
+                if (photo.maintainAspectRatio) {
+                    photo.height = photo.width / photo.aspectRatio;
+                } else {
+                    photo.height = Math.max(50, snapToGridValue(startHeight + dy));
+                }
+            } else if (currentHandle.classList.contains('ne')) {
+                photo.width = Math.max(50, snapToGridValue(startWidth + dx));
+                if (photo.maintainAspectRatio) {
+                    photo.height = photo.width / photo.aspectRatio;
+                    photo.y = startTop + startHeight - photo.height;
+                } else {
+                    photo.height = Math.max(50, snapToGridValue(startHeight - dy));
+                    photo.y = snapToGridValue(startTop + dy);
+                }
+            } else if (currentHandle.classList.contains('nw')) {
+                photo.width = Math.max(50, snapToGridValue(startWidth - dx));
+                photo.x = snapToGridValue(startLeft + dx);
+                if (photo.maintainAspectRatio) {
+                    photo.height = photo.width / photo.aspectRatio;
+                    photo.y = startTop + startHeight - photo.height;
+                } else {
+                    photo.height = Math.max(50, snapToGridValue(startHeight - dy));
+                    photo.y = snapToGridValue(startTop + dy);
+                }
+            }
+            
+            element.style.width = photo.width + 'px';
+            element.style.height = photo.height + 'px';
+            element.style.left = photo.x + 'px';
+            element.style.top = photo.y + 'px';
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isResizing = false;
+            currentHandle = null;
+        });
+    }
+
+    function makeRotatable(element, photo) {
+        const handle = element.querySelector('.rotate-handle');
+        let isRotating = false;
+        let centerX, centerY;
+        
+        handle?.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            isRotating = true;
+            const rect = element.getBoundingClientRect();
+            centerX = rect.left + rect.width / 2;
+            centerY = rect.top + rect.height / 2;
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isRotating) return;
+            
+            const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI + 90;
+            photo.rotation = snapToGridValue(angle, 15);
+            element.style.transform = `rotate(${photo.rotation}deg)`;
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isRotating = false;
+        });
+    }
+
+    function snapToGridValue(value, gridSize = null) {
+        if (!state.snapToGrid) return value;
+        const grid = gridSize || state.gridSize;
+        return Math.round(value / grid) * grid;
+    }
+
+    function selectItem(id, type) {
+        deselectAll();
+        state.selectedItem = { id, type };
+        const element = document.querySelector(`[data-id="${id}"]`);
+        element?.classList.add('selected');
+        
+        if (type === 'text') {
+            document.getElementById('textEditor').classList.remove('hidden');
+            const text = state.pages[state.currentPage].texts.find(t => t.id === id);
+            document.getElementById('textContent').value = text.content;
+            document.getElementById('textFont').value = text.fontFamily;
+            document.getElementById('textSize').value = text.fontSize;
+            document.getElementById('textColor').value = text.color;
+        }
+    }
+
+    function selectText(id) {
+        selectItem(id, 'text');
+    }
+
+    function deselectAll() {
+        document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+        state.selectedItem = null;
+        document.getElementById('textEditor').classList.add('hidden');
+    }
+
+    function updateSelectedText() {
+        if (!state.selectedItem || state.selectedItem.type !== 'text') return;
+        
+        const text = state.pages[state.currentPage].texts.find(t => t.id === state.selectedItem.id);
+        text.content = document.getElementById('textContent').value;
+        text.fontFamily = document.getElementById('textFont').value;
+        text.fontSize = parseInt(document.getElementById('textSize').value);
+        text.color = document.getElementById('textColor').value;
+        
+        renderCurrentPage();
+        selectItem(text.id, 'text');
+    }
+
+    function toggleBold() {
+        if (!state.selectedItem || state.selectedItem.type !== 'text') return;
+        const text = state.pages[state.currentPage].texts.find(t => t.id === state.selectedItem.id);
+        text.bold = !text.bold;
+        renderCurrentPage();
+        selectItem(text.id, 'text');
+    }
+
+    function toggleItalic() {
+        if (!state.selectedItem || state.selectedItem.type !== 'text') return;
+        const text = state.pages[state.currentPage].texts.find(t => t.id === state.selectedItem.id);
+        text.italic = !text.italic;
+        renderCurrentPage();
+        selectItem(text.id, 'text');
+    }
+
+    function cycleTextAlign() {
+        if (!state.selectedItem || state.selectedItem.type !== 'text') return;
+        const text = state.pages[state.currentPage].texts.find(t => t.id === state.selectedItem.id);
+        state.currentTextAlign = (state.currentTextAlign + 1) % 3;
+        text.align = state.textAlignOptions[state.currentTextAlign];
+        renderCurrentPage();
+        selectItem(text.id, 'text');
+    }
+
+    // Gerenciamento de páginas
+    function addNewPage() {
+        state.pages.push({ photos: [], texts: [], bgColor: state.pages[state.currentPage].bgColor });
+        state.currentPage = state.pages.length - 1;
+        updatePageUI();
+        renderCurrentPage();
+    }
+
+    function duplicatePage() {
+        const currentPageCopy = JSON.parse(JSON.stringify(state.pages[state.currentPage]));
+        state.pages.splice(state.currentPage + 1, 0, currentPageCopy);
+        state.currentPage++;
+        updatePageUI();
+        renderCurrentPage();
+    }
+
+    function deletePage() {
+        if (state.pages.length === 1) {
+            alert('Não é possível deletar a última página');
+            return;
+        }
+        state.pages.splice(state.currentPage, 1);
+        if (state.currentPage >= state.pages.length) {
+            state.currentPage = state.pages.length - 1;
+        }
+        updatePageUI();
+        renderCurrentPage();
+    }
+
+    function prevPage() {
+        if (state.currentPage > 0) {
+            state.currentPage--;
+            updatePageUI();
+            renderCurrentPage();
+        }
+    }
+
+    function nextPage() {
+        if (state.currentPage < state.pages.length - 1) {
+            state.currentPage++;
+            updatePageUI();
+            renderCurrentPage();
+        }
+    }
+
+    function updatePageUI() {
+        document.getElementById('currentPageNum').textContent = state.currentPage + 1;
+        document.getElementById('totalPages').textContent = state.pages.length;
+        document.getElementById('btnPrevPage').disabled = state.currentPage === 0;
+        document.getElementById('btnNextPage').disabled = state.currentPage === state.pages.length - 1;
+        renderThumbnails();
+    }
+
+    function renderThumbnails() {
+        const list = document.getElementById('thumbnailsList');
+        list.innerHTML = '';
+        
+        state.pages.forEach((page, index) => {
+            const div = document.createElement('div');
+            div.className = `thumbnail border-2 rounded-lg overflow-hidden cursor-pointer ${index === state.currentPage ? 'active' : 'border-slate-200'}`;
+            div.innerHTML = `
+                <div class="aspect-[210/297] bg-white flex items-center justify-center text-xs text-slate-400">
+                    Página ${index + 1}
+                </div>
+            `;
+            div.addEventListener('click', () => {
+                state.currentPage = index;
+                updatePageUI();
+                renderCurrentPage();
+            });
+            list.appendChild(div);
+        });
+    }
+
+    function updateThumbnails() {
+        renderThumbnails();
+    }
+
+    // Zoom
+    function adjustZoom(delta) {
+        state.zoom = Math.max(0.25, Math.min(2, state.zoom + delta));
+        applyZoom();
+    }
+
+    function fitToScreen() {
+        state.zoom = 1;
+        applyZoom();
+    }
+
+    function applyZoom() {
+        document.getElementById('canvasContainer').style.transform = `scale(${state.zoom})`;
+        document.getElementById('canvasContainer').style.transformOrigin = 'top center';
+        document.getElementById('zoomLevel').textContent = Math.round(state.zoom * 100) + '%';
+    }
+
+    // Salvar/Carregar projeto
+    function newProject() {
+        if (confirm('Criar novo projeto? Todo trabalho não salvo será perdido.')) {
+            state.pages = [{ photos: [], texts: [], bgColor: '#ffffff' }];
+            state.currentPage = 0;
+            state.photos = [];
+            document.getElementById('photosList').innerHTML = '';
+            updatePageUI();
+            renderCurrentPage();
+        }
+    }
+
+    function saveProject() {
+        const data = {
+            format: state.format,
+            orientation: state.orientation,
+            pages: state.pages,
+            photos: state.photos,
+            margin: state.margin,
+            bleed: state.bleed
+        };
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `album_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function loadProject(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                state.format = data.format;
+                state.orientation = data.orientation;
+                state.pages = data.pages;
+                state.photos = data.photos || [];
+                state.margin = data.margin || 10;
+                state.bleed = data.bleed || 3;
+                state.currentPage = 0;
+                
+                updateFormatButtons();
+                updateOrientationButtons();
+                updateCanvasSize();
+                updatePageUI();
+                renderCurrentPage();
+                
+                // Recarregar fotos
+                document.getElementById('photosList').innerHTML = '';
+                state.photos.forEach(photo => addPhotoThumbnail(photo));
+            } catch (err) {
+                alert('Erro ao carregar projeto: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    }
+
+    // Exportar PDF - CORREÇÃO: Verificar se jspdf carregou antes de usar
+    async function exportPDF() {
+        // Verificação crítica para corrigir o erro Cannot destructure property 'jsPDF'
+        if (typeof window.jspdf === 'undefined') {
+            showErrorModal();
+            return;
+        }
+        
+        const { jsPDF } = window.jspdf;
+        
+        if (typeof window.html2canvas === 'undefined') {
+            showErrorModal();
+            return;
+        }
+        
+        const modal = document.getElementById('exportModal');
+        modal.classList.remove('hidden');
+        document.getElementById('exportProgress').classList.remove('hidden');
+        document.getElementById('exportComplete').classList.add('hidden');
+        
+        try {
+            let width = formats[state.format].width;
+            let height = formats[state.format].height;
+            
+            if (state.orientation === 'landscape') {
+                [width, height] = [height, width];
+            }
+            
+            // PDF em 300 DPI - converter pixels para mm
+            const pdfWidth = width / MM_TO_PX;
+            const pdfHeight = height / MM_TO_PX;
+            
+            const pdf = new jsPDF({
+                orientation: state.orientation,
+                unit: 'mm',
+                format: [pdfWidth, pdfHeight],
+                compress: true
+            });
+            
+            const currentPageCache = state.currentPage;
+            
+            for (let i = 0; i < state.pages.length; i++) {
+                state.currentPage = i;
+                renderCurrentPage();
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                const progress = ((i + 1) / state.pages.length) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+                document.getElementById('progressText').textContent = `Página ${i + 1} de ${state.pages.length}`;
+                
+                const canvas = await html2canvas(document.getElementById('canvasContainer'), {
+                    scale: 300 / 96, // Escala para 300 DPI
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: state.pages[i].bgColor,
+                    logging: false
+                });
+                
+                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                
+                if (i > 0) pdf.addPage();
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+            }
+            
+            state.currentPage = currentPageCache;
+            renderCurrentPage();
+            
+            pdf.save(`album_${Date.now()}.pdf`);
+            
+            document.getElementById('exportProgress').classList.add('hidden');
+            document.getElementById('exportComplete').classList.remove('hidden');
+            lucide.createIcons();
+        } catch (error) {
+            console.error('Erro ao exportar PDF:', error);
+            alert('Erro ao gerar PDF: ' + error.message);
+            modal.classList.add('hidden');
+        }
+    }
+
+    function showErrorModal() {
+        document.getElementById('errorModal').classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    // Teclas de atalho
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Delete' && state.selectedItem) {
+            const page = state.pages[state.currentPage];
+            if (state.selectedItem.type === 'photo') {
+                page.photos = page.photos.filter(p => p.id !== state.selectedItem.id);
+            } else {
+                page.texts = page.texts.filter(t => t.id !== state.selectedItem.id);
+            }
+            deselectAll();
+            renderCurrentPage();
+        }
+        
+        if (e.ctrlKey || e.metaKey) {
+            if (e.key === 's') {
+                e.preventDefault();
+                saveProject();
+            }
+            if (e.key === 'n') {
+                e.preventDefault();
+                newProject();
+            }
+        }
+    });
+</script>
+<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
+</body>
+</html>
