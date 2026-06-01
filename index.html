@@ -1,32 +1,151 @@
-# Álbum Digital Profissional
-
-Editor de álbuns A4/A5 com posicionamento livre das fotos. 100% offline, roda direto no navegador.
-
-**[Demo Online](https://seuusuario.github.io/album-digital/)**
-
-## Recursos
-- Canvas livre: arraste, redimensione, gire fotos
-- A4/A5 Vertical/Horizontal 
-- Capa + páginas ilimitadas + contracapa
-- Upload múltiplo + bandeja de fotos
-- Templates: Grade 2x2, 3 colunas, destaque
-- Exportar PDF completo com 1 clique
-- Auto-save a cada 5s
-- Exportar/Importar projeto .json
-- Atalhos: Del, Ctrl+S, Ctrl+D
-- Fotos sem corte: object-fit contain
-
-## Deploy GitHub Pages
-1. Fork ou clone este repo
-2. Settings > Pages > Deploy from branch > main / root
-3. Acesse https://seuusuario.github.io/repo
-
-## Uso para empresa
-1. Escolha formato A4/A5
-2. Upload em lote das fotos
-3. Use template ou posicione manual
-4. + Nova Página quando terminar
-5. Exportar PDF Completo = álbum pronto pra gráfica
-
-## Licença
-MIT - Uso comercial liberado
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Álbum Digital Profissional - Canvas Livre</title>
+<meta name="description" content="Editor A4/A5 offline. Posicionamento livre, PDF completo.">
+<base href="./">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,sans-serif;background:#e5e5e5;overflow:hidden}
+.app{display:flex;height:100vh}
+.side{width:200px;background:#2d2d2d;color:#fff;padding:12px;overflow-y:auto}
+.main{flex:1;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px}
+.props{width:240px;background:#fff;border-left:1px solid #ddd;padding:16px;overflow-y:auto}
+.page{background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.15);position:relative}
+.a4-v{width:210mm;height:297mm}.a4-h{width:297mm;height:210mm}
+.a5-v{width:148mm;height:210mm}.a5-h{width:210mm;height:148mm}
+.foto{position:absolute;cursor:move;border:2px solid transparent}
+.foto.sel{border-color:#06f}.foto img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
+.btn{padding:8px 12px;background:#06f;color:#fff;border:none;border-radius:4px;cursor:pointer;width:100%;margin:4px 0}
+.btn:hover{background:#05c}.thumb{width:100%;aspect-ratio:210/297;background:#fff;margin-bottom:8px;cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:12px}
+.thumb.active{border-color:#06f}input,select{width:100%;padding:6px;margin:4px 0}
+@media print{.no-print{display:none!important}.page{margin:0;box-shadow:none;page-break-after:always}.page:last-child{page-break-after:auto}@page{margin:0}}
+</style>
+</head>
+<body>
+<!-- MIT License - Álbum Digital Profissional -->
+<div class="app">
+<div class="side no-print">
+<h3 style="font-size:14px;margin-bottom:12px">Páginas</h3>
+<div id="thumbs"></div>
+<button class="btn" onclick="novaPg()">+ Nova Página</button>
+<button class="btn" onclick="duplicarPg()">Duplicar</button>
+<button class="btn" onclick="exportarPDF()">Exportar PDF Completo</button>
+<button class="btn" onclick="exportarJSON()">Salvar Projeto</button>
+<button class="btn" onclick="importarJSON()">Carregar Projeto</button>
+</div>
+<div class="main"><div id="page" class="page a4-v"></div></div>
+<div class="props no-print">
+<h3 style="font-size:14px;margin-bottom:12px">Propriedades</h3>
+<label>Formato:<select id="fmt" onchange="trocarFmt()">
+<option value="a4-v">A4 Vertical</option><option value="a4-h">A4 Horizontal</option>
+<option value="a5-v">A5 Vertical</option><option value="a5-h">A5 Horizontal</option>
+</select></label>
+<label>Upload:<input type="file" id="up" multiple accept="image/*"></label>
+<div id="bandeja" style="margin-top:12px;max-height:300px;overflow-y:auto"></div>
+<div id="propsFoto" style="margin-top:16px;display:none">
+<h4>Foto Selecionada</h4>
+<label>X:<input type="number" id="px" onchange="upd()"></label>
+<label>Y:<input type="number" id="py" onchange="upd()"></label>
+<label>Largura:<input type="number" id="pw" onchange="upd()"></label>
+<label>Altura:<input type="number" id="ph" onchange="upd()"></label>
+<label>Rotação:<input type="number" id="pr" onchange="upd()"></label>
+<button class="btn" onclick="frente()">Trazer pra Frente</button>
+<button class="btn" onclick="tras()">Enviar pra Trás</button>
+<button class="btn" onclick="del()">Deletar</button>
+</div></div></div>
+<script>
+let p={fmt:'a4-v',pgs:[{id:'Capa',f:[]},{id:'Contracapa',f:[]}],pg:0},s=null,d=null;
+const init=()=>{const v=localStorage.getItem('album');if(v)p=JSON.parse(v);render()};
+init();
+function render(){
+const page=document.getElementById('page');
+page.className='page '+p.fmt;page.innerHTML='';
+p.pgs[p.pg].f.forEach((f,i)=>{
+const div=document.createElement('div');
+div.className='foto'+(s===i?' sel':'');
+div.style.cssText=`left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px;transform:rotate(${f.r}deg);z-index:${f.z}`;
+div.innerHTML=`<img src="${f.src}">`;
+div.onmousedown=e=>start(e,i);
+page.appendChild(div);
+});
+thumbs();save();
+}
+function thumbs(){
+const d=document.getElementById('thumbs');d.innerHTML='';
+p.pgs.forEach((pg,i)=>{
+const t=document.createElement('div');
+t.className='thumb'+(i===p.pg?' active':'');t.textContent=pg.id;
+t.onclick=()=>{p.pg=i;s=null;render()};
+d.appendChild(t);
+});
+}
+function start(e,i){
+s=i;d={x:e.clientX-p.pgs[p.pg].f[i].x,y:e.clientY-p.pgs[p.pg].f[i].y};
+render();document.onmousemove=move;document.onmouseup=end;props();
+}
+function move(e){
+if(d===null)return;
+const f=p.pgs[p.pg].f[s];f.x=e.clientX-d.x;f.y=e.clientY-d.y;render();
+}
+function end(){d=null;document.onmousemove=null}
+document.getElementById('up').onchange=e=>{
+Array.from(e.target.files).forEach(file=>{
+const r=new FileReader();
+r.onload=ev=>{
+const img=document.createElement('img');
+img.src=ev.target.result;img.style.width='100%';img.style.cursor='pointer';img.style.marginBottom='8px';
+img.onclick=()=>addF(ev.target.result);
+document.getElementById('bandeja').appendChild(img);
+};
+r.readAsDataURL(file);
+});
+};
+function addF(src){p.pgs[p.pg].f.push({src,x:50,y:50,w:200,h:200,r:0,z:1});render()}
+function novaPg(){p.pgs.splice(p.pgs.length-1,0,{id:'Pág '+p.pgs.length,f:[]});p.pg=p.pgs.length-2;render()}
+function duplicarPg(){const c=JSON.parse(JSON.stringify(p.pgs[p.pg]));c.id+=' cópia';p.pgs.splice(p.pg+1,0,c);p.pg++;render()}
+function props(){
+if(s===null){document.getElementById('propsFoto').style.display='none';return}
+const f=p.pgs[p.pg].f[s];document.getElementById('propsFoto').style.display='block';
+document.getElementById('px').value=f.x;document.getElementById('py').value=f.y;
+document.getElementById('pw').value=f.w;document.getElementById('ph').value=f.h;
+document.getElementById('pr').value=f.r;
+}
+function upd(){
+if(s===null)return;const f=p.pgs[p.pg].f[s];
+f.x=parseInt(document.getElementById('px').value);f.y=parseInt(document.getElementById('py').value);
+f.w=parseInt(document.getElementById('pw').value);f.h=parseInt(document.getElementById('ph').value);
+f.r=parseInt(document.getElementById('pr').value);render();
+}
+function frente(){if(s!==null){p.pgs[p.pg].f[s].z++;render()}}
+function tras(){if(s!==null){p.pgs[p.pg].f[s].z--;render()}}
+function del(){if(s!==null){p.pgs[p.pg].f.splice(s,1);s=null;render()}}
+function trocarFmt(){p.fmt=document.getElementById('fmt').value;render()}
+function exportarPDF(){
+const st=document.createElement('style');
+const size=p.fmt.includes('a4')?'A4':'A5';const orient=p.fmt.includes('h')?'landscape':'portrait';
+st.textContent=`@page{size:${size} ${orient};margin:0}`;
+document.head.appendChild(st);window.print();setTimeout(()=>st.remove(),100);
+}
+function exportarJSON(){
+const blob=new Blob([JSON.stringify(p)],{type:'application/json'});
+const url=URL.createObjectURL(blob);const a=document.createElement('a');
+a.href=url;a.download='album.json';a.click();
+}
+function importarJSON(){
+const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+inp.onchange=e=>{const r=new FileReader();r.onload=ev=>{p=JSON.parse(ev.target.result);render()};r.readAsText(e.target.files[0])};
+inp.click();
+}
+function save(){localStorage.setItem('album',JSON.stringify(p))}
+document.addEventListener('keydown',e=>{
+if(e.key==='Delete'&&s!==null)del();
+if(e.ctrlKey&&e.key==='s'){e.preventDefault();exportarJSON()}
+if(e.ctrlKey&&e.key==='d'){e.preventDefault();if(s!==null){const f=JSON.parse(JSON.stringify(p.pgs[p.pg].f[s]));f.x+=20;f.y+=20;p.pgs[p.pg].f.push(f);render()}}
+});
+setInterval(save,5000);
+</script>
+</body>
+</html>
