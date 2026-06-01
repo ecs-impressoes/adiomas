@@ -1,1 +1,967 @@
-<!DOCTYPE html><html class="optimisticai_d4925249-module__omuUYW__variable optimisticmono_9b82a078-module__K58pLa__variable light antialiased" data-style="default" data-accent-color="blue"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/><link rel="stylesheet" href="/_next/static/chunks/0--p8zahcyi.v.css" nonce="ZTU3NmQ0NWEtNmNmMC00YjAxLTkzYzUtZWRlZjllNTQ0NTA4" data-precedence="next"/><link rel="stylesheet" href="/_next/static/chunks/0z_70fz8gazpn.css" nonce="ZTU3NmQ0NWEtNmNmMC00YjAxLTkzYzUtZWRlZjllNTQ0NTA4" data-precedence="next"/><link rel="stylesheet" href="/_next/static/chunks/06kpup_j3c2dd.css" nonce="ZTU3NmQ0NWEtNmNmMC00YjAxLTkzYzUtZWRlZjllNTQ0NTA4" data-precedence="next"/><link rel="preload" as="script" fetchPriority="low" nonce="ZTU3NmQ0NWEtNmNmMC00YjAxLTkzYzUtZWRlZjllNTQ0NTA4" href="/_next/static/chunks/1753h539w9xgm.js"/><script src="/_next/static/chunks/14e1n82w1x34m.js" async="" nonce="ZTU3NmQ0NWEtNmNmMC00YjA
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Álbum Digital Offline</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  :root {
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --border: #e5e7eb;
+    --bg: #f9fafb;
+    --text: #1f2937;
+  }
+
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+
+  .toolbar-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 12px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .toolbar-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding-right: 12px;
+    border-right: 1px solid var(--border);
+  }
+
+  .toolbar-group:last-child {
+    border-right: none;
+    margin-left: auto;
+  }
+
+  .btn {
+    appearance: none;
+    border: none;
+    background: var(--primary);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+  }
+
+  .btn-secondary {
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg);
+  }
+
+  .btn-danger {
+    background: var(--danger);
+  }
+
+  .btn-danger:hover {
+    background: #dc2626;
+  }
+
+  .btn-success {
+    background: var(--success);
+  }
+
+  .btn-success:hover {
+    background: #16a34a;
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  select, input[type="color"], input[type="file"] {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+  }
+
+  input[type="color"] {
+    width: 40px;
+    height: 34px;
+    padding: 2px;
+    cursor: pointer;
+  }
+
+  .main-container {
+    max-width: 1400px;
+    margin: 24px auto;
+    padding: 0 20px;
+  }
+
+  .pages-nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .page-tab {
+    padding: 8px 16px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .page-tab:hover {
+    background: var(--bg);
+  }
+
+  .page-tab.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+
+  .page-tab .delete-page {
+    margin-left: 8px;
+    color: inherit;
+    opacity: 0.6;
+    cursor: pointer;
+  }
+
+  .page-tab .delete-page:hover {
+    opacity: 1;
+  }
+
+  .album-page {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    padding: 32px;
+    min-height: 600px;
+    margin-bottom: 24px;
+    transition: background 0.3s;
+  }
+
+  .album-page.a4 {
+    max-width: 794px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .album-page.a5 {
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .page-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .editable-text {
+    width: 100%;
+    border: 2px dashed transparent;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    font-family: inherit;
+    background: transparent;
+    resize: none;
+    overflow: hidden;
+  }
+
+  .editable-text:hover {
+    border-color: var(--border);
+    background: var(--bg);
+  }
+
+  .editable-text:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+  }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .page-subtitle {
+    font-size: 16px;
+    color: #6b7280;
+    text-align: center;
+  }
+
+  .mosaic {
+    column-count: 1;
+    column-gap: 16px;
+  }
+
+  .photo-item {
+    break-inside: avoid;
+    margin-bottom: 16px;
+    display: inline-block;
+    width: 100%;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .photo-item.dragging {
+    opacity: 0.4;
+    transform: scale(0.95);
+  }
+
+  .photo-item.drag-over {
+    transform: scale(1.02);
+  }
+
+  .photo-wrapper {
+    background: #fafafa;
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    cursor: move;
+    position: relative;
+    transition: all 0.2s;
+  }
+
+  .photo-wrapper:hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .photo-wrapper img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 2px;
+  }
+
+  .photo-actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .photo-wrapper:hover .photo-actions {
+    opacity: 1;
+  }
+
+  .photo-action-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(255,255,255,0.95);
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+  }
+
+  .photo-action-btn:hover {
+    background: white;
+    transform: scale(1.1);
+  }
+
+  .photo-caption {
+    padding: 8px 4px;
+    font-size: 14px;
+    text-align: center;
+    width: 100%;
+    border: 1px dashed transparent;
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+
+  .photo-caption:hover {
+    border-color: var(--border);
+    background: var(--bg);
+  }
+
+  .photo-caption:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+  }
+
+  .upload-zone {
+    border: 3px dashed var(--border);
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    background: var(--bg);
+    margin-bottom: 24px;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .upload-zone.drag-active {
+    border-color: var(--primary);
+    background: #eef2ff;
+  }
+
+  .upload-zone p {
+    color: #6b7280;
+    margin-top: 8px;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6b7280;
+  }
+
+  @media (min-width: 600px) {
+    .album-page.a5 .mosaic {
+      column-count: 2;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .album-page.a4 .mosaic {
+      column-count: 3;
+    }
+    .photo-item.wide {
+      width: calc(200% + 16px);
+    }
+  }
+
+  @media print {
+    body {
+      background: white;
+    }
+    .toolbar, .pages-nav, .upload-zone, .photo-actions, .btn {
+      display: none !important;
+    }
+    .main-container {
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    .album-page {
+      box-shadow: none;
+      border-radius: 0;
+      margin: 0;
+      padding: 20mm;
+      page-break-after: always;
+      min-height: 0;
+    }
+    .album-page.a4 {
+      width: 210mm;
+      min-height: 297mm;
+      max-width: 210mm;
+    }
+    .album-page.a5 {
+      width: 148mm;
+      min-height: 210mm;
+      max-width: 148mm;
+    }
+    .album-page:last-child {
+      page-break-after: auto;
+    }
+    .editable-text, .photo-caption {
+      border: none !important;
+      background: transparent !important;
+    }
+    .photo-wrapper {
+      box-shadow: none;
+      page-break-inside: avoid;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .toolbar-group {
+      border-right: none;
+      padding-right: 0;
+    }
+    .toolbar-inner {
+      justify-content: center;
+    }
+    .album-page {
+      padding: 20px;
+    }
+    .page-title {
+      font-size: 22px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="toolbar-inner">
+      <div class="toolbar-group">
+        <button class="btn btn-sm" id="addPageBtn">+ Página</button>
+        <button class="btn btn-sm btn-secondary" id="addCoverBtn">+ Capa</button>
+        <button class="btn btn-sm btn-secondary" id="addBackCoverBtn">+ Contracapa</button>
+      </div>
+      <div class="toolbar-group">
+        <label style="font-size: 14px;">Formato:</label>
+        <select id="formatSelect">
+          <option value="a4">A4</option>
+          <option value="a5">A5</option>
+        </select>
+      </div>
+      <div class="toolbar-group">
+        <label style="font-size: 14px;">Fundo:</label>
+        <input type="color" id="bgColorInput" value="#ffffff">
+      </div>
+      <div class="toolbar-group">
+        <button class="btn btn-sm btn-success" id="saveBtn">Salvar</button>
+        <button class="btn btn-sm btn-secondary" id="loadBtn">Carregar</button>
+        <button class="btn btn-sm" id="printBtn">Imprimir/Salvar PDF</button>
+        <button class="btn btn-sm btn-danger" id="clearBtn">Limpar Tudo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="pages-nav" id="pagesNav"></div>
+    
+    <div class="upload-zone" id="uploadZone">
+      <div style="font-size: 48px; margin-bottom: 8px;">📷</div>
+      <h3 style="margin-bottom: 8px;">Adicionar Fotos</h3>
+      <p>Clique aqui ou arraste imagens para esta área</p>
+      <p style="font-size: 13px; margin-top: 12px;">Suporta JPG, PNG, WEBP. Fotos verticais 3000x4000px são exibidas sem corte.</p>
+      <input type="file" id="fileInput" accept="image/*" multiple>
+    </div>
+
+    <div id="albumPages"></div>
+  </div>
+
+<script>
+(function() {
+  'use strict';
+  
+  let albumData = {
+    format: 'a4',
+    currentPage: 0,
+    pages: [
+      { type: 'cover', title: 'Meu Álbum', subtitle: 'Clique para editar', bgColor: '#ffffff', photos: [] }
+    ]
+  };
+
+  let draggedElement = null;
+  let draggedPageIndex = null;
+  let draggedPhotoIndex = null;
+
+  const elements = {
+    pagesNav: document.getElementById('pagesNav'),
+    albumPages: document.getElementById('albumPages'),
+    uploadZone: document.getElementById('uploadZone'),
+    fileInput: document.getElementById('fileInput'),
+    addPageBtn: document.getElementById('addPageBtn'),
+    addCoverBtn: document.getElementById('addCoverBtn'),
+    addBackCoverBtn: document.getElementById('addBackCoverBtn'),
+    formatSelect: document.getElementById('formatSelect'),
+    bgColorInput: document.getElementById('bgColorInput'),
+    saveBtn: document.getElementById('saveBtn'),
+    loadBtn: document.getElementById('loadBtn'),
+    printBtn: document.getElementById('printBtn'),
+    clearBtn: document.getElementById('clearBtn')
+  };
+
+  function init() {
+    loadFromStorage();
+    render();
+    setupEventListeners();
+  }
+
+  function setupEventListeners() {
+    elements.addPageBtn.addEventListener('click', () => addPage('page'));
+    elements.addCoverBtn.addEventListener('click', () => addPage('cover'));
+    elements.addBackCoverBtn.addEventListener('click', () => addPage('backcover'));
+    elements.formatSelect.addEventListener('change', (e) => updateFormat(e.target.value));
+    elements.bgColorInput.addEventListener('input', (e) => updateBgColor(e.target.value));
+    elements.saveBtn.addEventListener('click', saveToStorage);
+    elements.loadBtn.addEventListener('click', loadFromStorage);
+    elements.printBtn.addEventListener('click', () => window.print());
+    elements.clearBtn.addEventListener('click', clearAll);
+
+    elements.uploadZone.addEventListener('click', () => elements.fileInput.click());
+    elements.fileInput.addEventListener('change', handleFileSelect);
+    
+    elements.uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      elements.uploadZone.classList.add('drag-active');
+    });
+    
+    elements.uploadZone.addEventListener('dragleave', () => {
+      elements.uploadZone.classList.remove('drag-active');
+    });
+    
+    elements.uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      elements.uploadZone.classList.remove('drag-active');
+      handleFiles(e.dataTransfer.files);
+    });
+  }
+
+  function render() {
+    renderPagesNav();
+    renderCurrentPage();
+    elements.formatSelect.value = albumData.format;
+    elements.bgColorInput.value = albumData.pages[albumData.currentPage]?.bgColor || '#ffffff';
+  }
+
+  function renderPagesNav() {
+    elements.pagesNav.innerHTML = '';
+    albumData.pages.forEach((page, index) => {
+      const tab = document.createElement('div');
+      tab.className = 'page-tab' + (index === albumData.currentPage ? ' active' : '');
+      tab.textContent = getPageLabel(page, index);
+      
+      if (albumData.pages.length > 1) {
+        const deleteBtn = document.createElement('span');
+        deleteBtn.className = 'delete-page';
+        deleteBtn.innerHTML = '×';
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deletePage(index);
+        });
+        tab.appendChild(deleteBtn);
+      }
+      
+      tab.addEventListener('click', () => switchPage(index));
+      elements.pagesNav.appendChild(tab);
+    });
+  }
+
+  function getPageLabel(page, index) {
+    if (page.type === 'cover') return 'Capa';
+    if (page.type === 'backcover') return 'Contracapa';
+    let pageNum = 0;
+    for (let i = 0; i <= index; i++) {
+      if (albumData.pages[i].type === 'page') pageNum++;
+    }
+    return `Página ${pageNum}`;
+  }
+
+  function renderCurrentPage() {
+    const page = albumData.pages[albumData.currentPage];
+    if (!page) return;
+
+    elements.albumPages.innerHTML = '';
+    const pageDiv = document.createElement('div');
+    pageDiv.className = `album-page ${albumData.format}`;
+    pageDiv.style.backgroundColor = page.bgColor;
+
+    const header = document.createElement('div');
+    header.className = 'page-header';
+    
+    const title = document.createElement('textarea');
+    title.className = 'editable-text page-title';
+    title.value = page.title;
+    title.placeholder = 'Título da página';
+    title.rows = 1;
+    title.addEventListener('input', (e) => {
+      updatePageTitle(albumData.currentPage, e.target.value);
+      autoResize(e.target);
+    });
+    autoResize(title);
+    header.appendChild(title);
+
+    if (page.type !== 'backcover') {
+      const subtitle = document.createElement('textarea');
+      subtitle.className = 'editable-text page-subtitle';
+      subtitle.value = page.subtitle;
+      subtitle.placeholder = 'Subtítulo ou descrição';
+      subtitle.rows = 1;
+      subtitle.addEventListener('input', (e) => {
+        updatePageSubtitle(albumData.currentPage, e.target.value);
+        autoResize(e.target);
+      });
+      autoResize(subtitle);
+      header.appendChild(subtitle);
+    }
+
+    pageDiv.appendChild(header);
+
+    if (page.photos.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.innerHTML = '<p>Nenhuma foto nesta página ainda.</p><p style="font-size: 14px; margin-top: 8px;">Use a área acima para adicionar fotos.</p>';
+      pageDiv.appendChild(empty);
+    } else {
+      const mosaic = document.createElement('div');
+      mosaic.className = 'mosaic';
+      
+      page.photos.forEach((photo, photoIndex) => {
+        const item = createPhotoItem(photo, photoIndex);
+        mosaic.appendChild(item);
+      });
+      
+      pageDiv.appendChild(mosaic);
+    }
+
+    elements.albumPages.appendChild(pageDiv);
+  }
+
+  function createPhotoItem(photo, photoIndex) {
+    const item = document.createElement('div');
+    item.className = 'photo-item';
+    if (photo.isWide) item.classList.add('wide');
+    item.draggable = true;
+    item.dataset.photoIndex = photoIndex;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'photo-wrapper';
+
+    const img = document.createElement('img');
+    img.src = photo.data;
+    img.alt = photo.caption || 'Foto do álbum';
+    img.loading = 'lazy';
+    wrapper.appendChild(img);
+
+    const actions = document.createElement('div');
+    actions.className = 'photo-actions';
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'photo-action-btn';
+    deleteBtn.innerHTML = '🗑';
+    deleteBtn.title = 'Remover foto';
+    deleteBtn.addEventListener('click', () => deletePhoto(photoIndex));
+    actions.appendChild(deleteBtn);
+    
+    wrapper.appendChild(actions);
+
+    const caption = document.createElement('input');
+    caption.className = 'photo-caption';
+    caption.type = 'text';
+    caption.value = photo.caption || '';
+    caption.placeholder = 'Adicionar legenda...';
+    caption.addEventListener('input', (e) => updatePhotoCaption(photoIndex, e.target.value));
+
+    item.appendChild(wrapper);
+    item.appendChild(caption);
+
+    item.addEventListener('dragstart', (e) => handleDragStart(e, photoIndex));
+    item.addEventListener('dragend', handleDragEnd);
+    item.addEventListener('dragover', (e) => handleDragOver(e, photoIndex));
+    item.addEventListener('drop', (e) => handleDrop(e, photoIndex));
+
+    return item;
+  }
+
+  function handleDragStart(e, photoIndex) {
+    draggedElement = e.currentTarget;
+    draggedPhotoIndex = photoIndex;
+    draggedPageIndex = albumData.currentPage;
+    setTimeout(() => draggedElement.classList.add('dragging'), 0);
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  function handleDragEnd(e) {
+    if (draggedElement) {
+      draggedElement.classList.remove('dragging');
+      draggedElement = null;
+    }
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  }
+
+  function handleDragOver(e, photoIndex) {
+    if (e.preventDefault) e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const target = e.currentTarget;
+    if (target !== draggedElement) {
+      target.classList.add('drag-over');
+    }
+    return false;
+  }
+
+  function handleDrop(e, photoIndex) {
+    if (e.stopPropagation) e.stopPropagation();
+    e.preventDefault();
+    
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    
+    if (draggedPhotoIndex !== null && draggedPageIndex === albumData.currentPage && draggedPhotoIndex !== photoIndex) {
+      const photos = albumData.pages[albumData.currentPage].photos;
+      const [movedPhoto] = photos.splice(draggedPhotoIndex, 1);
+      photos.splice(photoIndex, 0, movedPhoto);
+      renderCurrentPage();
+      showNotification('Foto reordenada');
+    }
+    
+    draggedPhotoIndex = null;
+    draggedPageIndex = null;
+    return false;
+  }
+
+  function handleFileSelect(e) {
+    handleFiles(e.target.files);
+    e.target.value = '';
+  }
+
+  function handleFiles(files) {
+    if (!files || files.length === 0) return;
+    
+    const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+    if (imageFiles.length === 0) {
+      showNotification('Nenhuma imagem válida selecionada', 'error');
+      return;
+    }
+
+    let loaded = 0;
+    imageFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const isWide = window.innerWidth > 900 && Math.random() < 0.3;
+        albumData.pages[albumData.currentPage].photos.push({
+          data: e.target.result,
+          caption: '',
+          isWide: isWide
+        });
+        loaded++;
+        if (loaded === imageFiles.length) {
+          renderCurrentPage();
+          showNotification(`${loaded} foto(s) adicionada(s)`);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function addPage(type) {
+    if (type === 'cover' || type === 'backcover') {
+      const exists = albumData.pages.find(p => p.type === type);
+      if (exists) {
+        showNotification(`${type === 'cover' ? 'Capa' : 'Contracapa'} já existe`, 'error');
+        return;
+      }
+    }
+
+    if (albumData.pages.length >= 12) {
+      showNotification('Máximo de 12 páginas atingido', 'error');
+      return;
+    }
+
+    const newPage = {
+      type: type,
+      title: type === 'cover' ? 'Capa do Álbum' : type === 'backcover' ? 'Contracapa' : 'Nova Página',
+      subtitle: type === 'cover' ? 'Subtítulo da capa' : 'Descrição da página',
+      bgColor: '#ffffff',
+      photos: []
+    };
+
+    if (type === 'cover') {
+      albumData.pages.unshift(newPage);
+      albumData.currentPage = 0;
+    } else if (type === 'backcover') {
+      albumData.pages.push(newPage);
+      albumData.currentPage = albumData.pages.length - 1;
+    } else {
+      albumData.pages.push(newPage);
+      albumData.currentPage = albumData.pages.length - 1;
+    }
+
+    render();
+    showNotification('Página adicionada');
+  }
+
+  function deletePage(index) {
+    if (albumData.pages.length <= 1) {
+      showNotification('Não é possível remover a última página', 'error');
+      return;
+    }
+    albumData.pages.splice(index, 1);
+    if (albumData.currentPage >= albumData.pages.length) {
+      albumData.currentPage = albumData.pages.length - 1;
+    }
+    render();
+    showNotification('Página removida');
+  }
+
+  function deletePhoto(photoIndex) {
+    albumData.pages[albumData.currentPage].photos.splice(photoIndex, 1);
+    renderCurrentPage();
+    showNotification('Foto removida');
+  }
+
+  function switchPage(index) {
+    albumData.currentPage = index;
+    render();
+  }
+
+  function updateFormat(format) {
+    albumData.format = format;
+    renderCurrentPage();
+  }
+
+  function updateBgColor(color) {
+    albumData.pages[albumData.currentPage].bgColor = color;
+    document.querySelector('.album-page').style.backgroundColor = color;
+  }
+
+  function updatePageTitle(pageIndex, title) {
+    albumData.pages[pageIndex].title = title;
+    renderPagesNav();
+  }
+
+  function updatePageSubtitle(pageIndex, subtitle) {
+    albumData.pages[pageIndex].subtitle = subtitle;
+  }
+
+  function updatePhotoCaption(photoIndex, caption) {
+    albumData.pages[albumData.currentPage].photos[photoIndex].caption = caption;
+  }
+
+  function autoResize(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  }
+
+  function saveToStorage() {
+    try {
+      localStorage.setItem('albumDigitalData', JSON.stringify(albumData));
+      showNotification('Álbum salvo com sucesso!', 'success');
+    } catch (e) {
+      showNotification('Erro ao salvar. Arquivo muito grande?', 'error');
+    }
+  }
+
+  function loadFromStorage() {
+    try {
+      const saved = localStorage.getItem('albumDigitalData');
+      if (saved) {
+        albumData = JSON.parse(saved);
+        render();
+        showNotification('Álbum carregado', 'success');
+      } else {
+        showNotification('Nenhum álbum salvo encontrado', 'error');
+      }
+    } catch (e) {
+      showNotification('Erro ao carregar dados', 'error');
+    }
+  }
+
+  function clearAll() {
+    if (!confirm('Tem certeza? Isso apagará todo o álbum.')) return;
+    albumData = {
+      format: 'a4',
+      currentPage: 0,
+      pages: [
+        { type: 'cover', title: 'Meu Álbum', subtitle: 'Clique para editar', bgColor: '#ffffff', photos: [] }
+      ]
+    };
+    localStorage.removeItem('albumDigitalData');
+    render();
+    showNotification('Álbum limpo');
+  }
+
+  function showNotification(message, type = 'info') {
+    const existing = document.querySelector('.notification');
+    if (existing) existing.remove();
+    
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#22c55e' : '#6366f1'};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      font-size: 14px;
+      animation: slideIn 0.3s ease;
+    `;
+    
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+    `;
+    document.head.appendChild(style);
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateX(400px)';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  window.addEventListener('beforeunload', () => {
+    try {
+      localStorage.setItem('albumDigitalData', JSON.stringify(albumData));
+    } catch (e) {}
+  });
+
+  init();
+})();
+</script>
+<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
+</body>
+</html>
