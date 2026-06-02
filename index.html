@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Studio Álbum Pro - Gerador Digital Profissional</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Criação de Cartazes</title>
     <style>
         * {
             margin: 0;
@@ -14,720 +12,391 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: #f5f7fb;
-            color: #1e293b;
-            padding: 30px 24px 60px;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
-        }
-
-        /* header */
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .header h1 {
-            font-size: 2.8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #2c3e66, #1e2f4b);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: -0.5px;
-        }
-        .header p {
-            color: #5b6e8c;
-            margin-top: 8px;
-            font-weight: 500;
-        }
-
-        /* toolbar principal */
-        .toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 32px;
             background: white;
-            padding: 18px 24px;
-            border-radius: 60px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
         }
 
-        .format-chooser {
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            height: fit-content;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .control-group input,
+        .control-group select,
+        .control-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .control-group input:focus,
+        .control-group select:focus,
+        .control-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .color-input {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: center;
         }
-        .format-btn {
-            background: #f1f4f9;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 1rem;
-        }
-        .format-btn.active {
-            background: #1e2f4b;
-            color: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-        }
-        .btn-icon {
-            background: #f0f2f5;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.9rem;
-        }
-        .btn-icon i {
-            margin-right: 8px;
-        }
-        .btn-primary {
-            background: #2c5f8a;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #1f4565;
+
+        .color-input input[type="color"] {
+            width: 60px;
+            height: 40px;
+            padding: 2px;
         }
 
-        /* grid do álbum */
-        .album-grid {
+        .poster-preview {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 500px;
+        }
+
+        .poster {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            min-height: 500px;
             display: flex;
             flex-direction: column;
-            gap: 40px;
+        }
+
+        .poster-header {
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .poster-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .poster-subtitle {
+            font-size: 18px;
+            color: #666;
+        }
+
+        .poster-body {
+            padding: 30px;
+            flex-grow: 1;
+        }
+
+        .poster-description {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .poster-offer {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .poster-footer {
+            padding: 20px;
+            text-align: center;
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
             margin-top: 20px;
         }
 
-        /* capa, contracapa e páginas */
-        .page-card {
-            background: white;
-            border-radius: 32px;
-            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
-            overflow: hidden;
-            transition: all 0.2s;
-        }
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 28px;
-            background: #fafcff;
-            border-bottom: 1px solid #e9edf2;
-        }
-        .page-title {
-            font-weight: 700;
-            font-size: 1.4rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .customize-btn {
-            background: none;
-            border: 1px solid #cbd5e1;
-            padding: 8px 18px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: 0.2s;
-        }
-        .customize-btn:hover {
-            background: #eef2ff;
-        }
-        .page-content {
-            padding: 28px;
-        }
-        /* layout de fotos internas com tamanhos variados */
-        .photos-gallery {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 24px;
-            align-items: flex-start;
-            justify-content: flex-start;
-            min-height: 280px;
-        }
-        .photo-item {
-            position: relative;
-            background: #f8fafc;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-        .photo-item:hover {
-            transform: scale(1.02);
-        }
-        .photo-item img {
-            display: block;
-            width: 100%;
-            height: auto;
-            object-fit: contain;
-            background: #f1f5f9;
-        }
-        .photo-actions {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            display: flex;
-            gap: 8px;
-            background: rgba(0,0,0,0.6);
-            padding: 6px 10px;
-            border-radius: 30px;
-            backdrop-filter: blur(4px);
-        }
-        .photo-actions button {
-            background: white;
+        .btn {
+            padding: 12px 24px;
             border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 12px;
-        }
-        .add-photo-btn {
-            background: #eef2ff;
-            border: 2px dashed #9aaebf;
-            border-radius: 24px;
-            padding: 24px 36px;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        /* tamanhos pré-definidos */
-        .size-preset {
-            display: inline-flex;
-            gap: 6px;
-            margin-top: 8px;
-            font-size: 0.7rem;
-            color: #4b5563;
-        }
-        /* capa especial */
-        .cover-area, .backcover-area {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-        .cover-preview {
-            max-width: 360px;
-            width: 100%;
-            border-radius: 28px;
-            box-shadow: 0 20px 30px -10px rgba(0,0,0,0.15);
-            overflow: hidden;
-            background: #eef2ff;
-        }
-        .cover-preview img {
-            width: 100%;
-            display: block;
-        }
-        .cover-custom-panel {
-            background: #f8fafc;
-            border-radius: 28px;
-            padding: 16px 20px;
-            width: 100%;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s, background 0.2s;
         }
 
-        /* modal de personalização */
-        .modal {
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .image-upload {
+            border: 2px dashed #ddd;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .image-upload:hover {
+            border-color: #667eea;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 10px;
             display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(6px);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
         }
-        .modal-content {
-            background: white;
-            max-width: 550px;
-            width: 90%;
-            border-radius: 40px;
-            padding: 28px;
-            box-shadow: 0 30px 50px rgba(0,0,0,0.3);
-        }
-        .modal-content h3 {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-        }
-        .upload-area {
-            border: 2px dashed #cbd5e1;
-            border-radius: 28px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-        .color-option {
-            display: flex;
-            gap: 12px;
-            margin: 15px 0;
-            flex-wrap: wrap;
-        }
-        .color-swatch {
-            width: 48px;
-            height: 48px;
-            border-radius: 60px;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-        .color-swatch.selected {
-            border-color: #111;
-            transform: scale(1.05);
-        }
-        footer {
-            text-align: center;
-            margin-top: 50px;
-            color: #6c7a91;
-        }
-        @media (max-width: 720px) {
-            .toolbar { flex-direction: column; align-items: center; border-radius: 32px; }
-            .photos-gallery { justify-content: center; }
-        }
-        button {
-            cursor: pointer;
-        }
-        .export-section {
-            margin-top: 32px;
-            text-align: center;
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h1><i class="fas fa-book-open"></i> Studio Álbum Pro</h1>
-        <p>Crie álbuns A4 / A5 • Fotos 6x10, 10x15, 15x18, 18x26 • Personalização total sem perda de qualidade</p>
-    </div>
-
-    <div class="toolbar">
-        <div class="format-chooser">
-            <button class="format-btn" data-format="A4">📘 Formato A4 (21x29.7cm)</button>
-            <button class="format-btn" data-format="A5">📙 Formato A5 (14.8x21cm)</button>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Sistema de Criação de Cartazes</h1>
+            <p>Crie e edite cartazes profissionais de forma simples e rápida</p>
         </div>
-        <div class="action-buttons">
-            <button id="exportJsonBtn" class="btn-icon"><i class="fas fa-download"></i> Exportar Álbum (.json)</button>
-            <button id="importJsonBtn" class="btn-icon"><i class="fas fa-upload"></i> Importar Álbum</button>
-            <input type="file" id="importFileInput" accept=".json" style="display: none">
-        </div>
-    </div>
 
-    <div class="album-grid" id="albumGrid"></div>
-    
-    <div class="export-section">
-        <button id="printPreviewBtn" class="btn-icon btn-primary"><i class="fas fa-print"></i> Visualizar Impressão Profissional</button>
-    </div>
-    <footer>🖼️ As imagens são armazenadas localmente (IndexedDB / memória) • Qualidade original preservada • Capa / Contracapa e páginas flexíveis</footer>
-</div>
-
-<!-- Modal Personalização Avançada -->
-<div id="customModal" class="modal">
-    <div class="modal-content">
-        <h3 id="modalTitle">Personalizar</h3>
-        <div id="modalBody"></div>
-        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-            <button id="modalCloseBtn" class="btn-icon">Fechar</button>
-            <button id="modalApplyBtn" class="btn-icon btn-primary">Aplicar</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    // Estado do álbum
-    let currentFormat = "A4";   // A4 ou A5
-    // Estrutura: capa, internalPages (array de páginas, cada página contém array de fotos com tamanho e dados)
-    // foto: { id, src, widthRatio, heightRatio, sizeLabel, dataURL? (bloco armazenado), file? }
-    // Para simplicidade, mantemos as imagens como DataURL (qualidade original)
-    let albumData = {
-        cover: { type: "cover", imageURL: null, bgColor: "#fdf8ed", textOverlay: "Meu Álbum" },
-        backcover: { type: "backcover", imageURL: null, bgColor: "#e9ecef", textOverlay: "Fim" },
-        pages: [] // cada página: { photos: [] }
-    };
-
-    // Tamanhos disponíveis e suas proporções relativas (largura/altura em % baseado no container)
-    const photoSizes = {
-        "6x10": { width: 6, height: 10, aspect: 6/10, label: "6x10 cm" },
-        "10x15": { width: 10, height: 15, aspect: 10/15, label: "10x15 cm" },
-        "15x18": { width: 15, height: 18, aspect: 15/18, label: "15x18 cm" },
-        "18x26": { width: 18, height: 26, aspect: 18/26, label: "18x26 cm" }
-    };
-
-    // ID sequencial
-    let nextPhotoId = 100;
-
-    // Inicializar com algumas páginas demo
-    function initDemo() {
-        albumData.pages = [];
-        // página 1 com fotos exemplo
-        addNewPage();
-        addNewPage();
-        // adiciona algumas fotos placeholder educativas
-        if(albumData.pages[0]) {
-            addPhotoToPage(0, "6x10", null, "📷 Exemplo 6x10");
-            addPhotoToPage(0, "10x15", null, "🌄 10x15");
-        }
-        if(albumData.pages[1]) {
-            addPhotoToPage(1, "15x18", null, "🖼️ 15x18");
-            addPhotoToPage(1, "18x26", null, "🏞️ 18x26");
-        }
-        renderAlbum();
-    }
-
-    function addNewPage() {
-        albumData.pages.push({ photos: [] });
-    }
-
-    function addPhotoToPage(pageIndex, sizeKey, fileOrDataURL, fallbackText = null) {
-        const size = photoSizes[sizeKey];
-        if(!size) return;
-        const newId = nextPhotoId++;
-        let imageSrc = null;
-        let originalDataURL = null;
-        if(fileOrDataURL && typeof fileOrDataURL === "string" && fileOrDataURL.startsWith("data:image")) {
-            originalDataURL = fileOrDataURL;
-            imageSrc = fileOrDataURL;
-        } else if(fileOrDataURL && fileOrDataURL instanceof File) {
-            // Criar dataURL sem compressão
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const photo = albumData.pages[pageIndex].photos.find(p => p.id === newId);
-                if(photo) {
-                    photo.src = e.target.result;
-                    photo.dataURL = e.target.result;
-                    renderAlbum();
-                }
-            };
-            reader.readAsDataURL(fileOrDataURL);
-            imageSrc = null; // temporário
-        } else {
-            // placeholder SVG ou texto
-            imageSrc = `https://placehold.co/400x${Math.round(400 * size.height/size.width)}/e2e8f0/94a3b8?text=${fallbackText || size.label}`;
-        }
-        const photoObj = {
-            id: newId,
-            sizeLabel: sizeKey,
-            widthPercent: 28, // percentual flexível no grid, manter estilo
-            src: imageSrc,
-            dataURL: originalDataURL,
-            aspect: size.aspect,
-            label: size.label
-        };
-        albumData.pages[pageIndex].photos.push(photoObj);
-        if(!fileOrDataURL || (fileOrDataURL instanceof File && !imageSrc)) renderAlbum();
-    }
-
-    function removePhoto(pageIndex, photoId) {
-        albumData.pages[pageIndex].photos = albumData.pages[pageIndex].photos.filter(p => p.id !== photoId);
-        renderAlbum();
-    }
-
-    // Renderização completa
-    function renderAlbum() {
-        const container = document.getElementById("albumGrid");
-        if(!container) return;
-        let html = `
-            <!-- CAPA -->
-            <div class="page-card">
-                <div class="page-header">
-                    <div class="page-title"><i class="fas fa-star" style="color:#f4c542;"></i> CAPA PERSONALIZÁVEL</div>
-                    <button class="customize-btn" data-target="cover"><i class="fas fa-palette"></i> Personalizar Capa</button>
+        <div class="main-content">
+            <div class="controls">
+                <h3>🖌️ Opções de Edição</h3>
+                
+                <div class="control-group">
+                    <label>📝 Título Principal</label>
+                    <input type="text" id="title" placeholder="Digite o título do cartaz" value="Oferta Especial!">
                 </div>
-                <div class="page-content">
-                    <div class="cover-area">
-                        <div class="cover-preview" id="coverPreview" style="background: ${albumData.cover.bgColor};">
-                            ${albumData.cover.imageURL ? `<img src="${albumData.cover.imageURL}" alt="capa">` : `<div style="padding:80px 20px; text-align:center; color:#2c3e66;"><i class="fas fa-camera" style="font-size:48px;"></i><h3>${albumData.cover.textOverlay}</h3><p>Clique em personalizar para adicionar foto ou cor</p></div>`}
+
+                <div class="control-group">
+                    <label>📌 Subtítulo</label>
+                    <input type="text" id="subtitle" placeholder="Digite o subtítulo" value="Aproveite as melhores ofertas">
+                </div>
+
+                <div class="control-group">
+                    <label>📄 Descrição</label>
+                    <textarea id="description" rows="3" placeholder="Descrição do produto/serviço">Produtos de alta qualidade com preços imperdíveis. Garanta já o seu!</textarea>
+                </div>
+
+                <div class="control-group">
+                    <label>🏷️ Oferta Especial</label>
+                    <input type="text" id="offer" placeholder="Ex: 50% OFF" value="Até 50% OFF">
+                </div>
+
+                <div class="control-group">
+                    <label>🎨 Cor de Fundo</label>
+                    <div class="color-input">
+                        <input type="color" id="bgColor" value="#ffffff">
+                        <span>Fundo do cartaz</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>🎨 Cor do Título</label>
+                    <div class="color-input">
+                        <input type="color" id="titleColor" value="#333333">
+                        <span>Cor do título</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>🖼️ Imagem (opcional)</label>
+                    <div class="image-upload" onclick="document.getElementById('imageUpload').click()">
+                        <p>📸 Clique para adicionar imagem</p>
+                        <input type="file" id="imageUpload" accept="image/*" style="display: none;" onchange="uploadImage(this)">
+                    </div>
+                    <img id="previewImage" class="preview-image" alt="Preview">
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="updatePoster()">🔄 Atualizar Cartaz</button>
+                    <button class="btn btn-success" onclick="exportPoster()">📸 Exportar como Imagem</button>
+                    <button class="btn btn-danger" onclick="resetPoster()">🔄 Resetar</button>
+                </div>
+            </div>
+
+            <div class="poster-preview">
+                <div class="poster" id="poster">
+                    <div class="poster-header" id="posterHeader">
+                        <div class="poster-title" id="posterTitle">Oferta Especial!</div>
+                        <div class="poster-subtitle" id="posterSubtitle">Aproveite as melhores ofertas</div>
+                    </div>
+                    <div class="poster-body">
+                        <div class="poster-description" id="posterDescription">
+                            Produtos de alta qualidade com preços imperdíveis. Garanta já o seu!
+                        </div>
+                        <div class="poster-offer" id="posterOffer">
+                            Até 50% OFF
                         </div>
                     </div>
-                </div>
-            </div>
-        `;
-        // Páginas internas
-        albumData.pages.forEach((page, idx) => {
-            html += `
-            <div class="page-card">
-                <div class="page-header">
-                    <div class="page-title"><i class="fas fa-images"></i> Página ${idx+1}</div>
-                    <div>
-                        <button class="customize-btn add-photo-page" data-page="${idx}" data-action="add"><i class="fas fa-plus"></i> Adicionar Foto</button>
-                        <button class="customize-btn" style="margin-left:8px;" data-target="pageBg" data-page="${idx}"><i class="fas fa-fill-drip"></i> Fundo da Página</button>
-                    </div>
-                </div>
-                <div class="page-content">
-                    <div class="photos-gallery" style="background: ${page.bgColor || '#ffffff'}; border-radius: 28px; padding: 20px;">
-                        ${page.photos.map(photo => {
-                            const sizeConf = photoSizes[photo.sizeLabel];
-                            let styleWidth = '180px';
-                            if(sizeConf) {
-                                // adaptar visual para diferentes tamanhos mantendo proporção autêntica
-                                const baseW = currentFormat === 'A4' ? 200 : 150;
-                                const scaleFactor = (sizeConf.width / 10) * 1.2;
-                                styleWidth = `${Math.min(280, baseW * scaleFactor)}px`;
-                            }
-                            return `
-                            <div class="photo-item" style="width:${styleWidth};">
-                                ${photo.src ? `<img src="${photo.src}" alt="foto" style="width:100%;">` : '<div style="background:#ccc; height:120px;">Carregando...</div>'}
-                                <div class="size-preset">📐 ${photo.label}</div>
-                                <div class="photo-actions">
-                                    <button class="remove-photo" data-page="${idx}" data-id="${photo.id}" title="Remover"><i class="fas fa-trash-alt"></i></button>
-                                    <button class="replace-photo" data-page="${idx}" data-id="${photo.id}" title="Substituir"><i class="fas fa-sync-alt"></i></button>
-                                </div>
-                            </div>`;
-                        }).join('')}
-                        ${page.photos.length === 0 ? `<div class="add-photo-btn" data-page-add="${idx}" style="cursor:pointer;"><i class="fas fa-cloud-upload-alt"></i> Clique para adicionar foto (6x10, 10x15, 15x18, 18x26)</div>` : ''}
+                    <div class="poster-footer">
+                        <p>📞 Ligue agora: (11) 99999-9999</p>
+                        <p>📍 Visite nossa loja ou acesse nosso site</p>
                     </div>
                 </div>
             </div>
-            `;
-        });
-        // Botão de adicionar nova página
-        html += `<div style="display:flex; justify-content:center; margin:20px 0;"><button id="addNewPageBtn" class="btn-icon" style="background:#fff; border:2px dashed #8ba0bc;"><i class="fas fa-plus-circle"></i> + Nova Página Interna</button></div>`;
+        </div>
+    </div>
 
-        // CONTRA CAPA
-        html += `
-            <div class="page-card">
-                <div class="page-header">
-                    <div class="page-title"><i class="fas fa-bookmark"></i> CONTRACAPA</div>
-                    <button class="customize-btn" data-target="backcover"><i class="fas fa-palette"></i> Personalizar Contracapa</button>
-                </div>
-                <div class="page-content">
-                    <div class="cover-area">
-                        <div class="cover-preview" id="backPreview" style="background: ${albumData.backcover.bgColor};">
-                            ${albumData.backcover.imageURL ? `<img src="${albumData.backcover.imageURL}" alt="contracapa">` : `<div style="padding:60px 20px; text-align:center;"><i class="fas fa-heart"></i><p>${albumData.backcover.textOverlay}</p></div>`}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script>
+        let currentImage = null;
 
-        container.innerHTML = html;
-        attachEventHandlers();
-    }
+        function updatePoster() {
+            const title = document.getElementById('title').value;
+            const subtitle = document.getElementById('subtitle').value;
+            const description = document.getElementById('description').value;
+            const offer = document.getElementById('offer').value;
+            const bgColor = document.getElementById('bgColor').value;
+            const titleColor = document.getElementById('titleColor').value;
 
-    function attachEventHandlers() {
-        // Personalizar capa/contracapa
-        document.querySelectorAll('[data-target="cover"]').forEach(btn => {
-            btn.addEventListener('click', () => openCustomModal('cover'));
-        });
-        document.querySelectorAll('[data-target="backcover"]').forEach(btn => {
-            btn.addEventListener('click', () => openCustomModal('backcover'));
-        });
-        // fundo página
-        document.querySelectorAll('[data-target="pageBg"]').forEach(btn => {
-            const pageIdx = btn.getAttribute('data-page');
-            btn.addEventListener('click', () => openPageBgModal(parseInt(pageIdx)));
-        });
-        // remover fotos
-        document.querySelectorAll('.remove-photo').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const page = parseInt(btn.getAttribute('data-page'));
-                const id = parseInt(btn.getAttribute('data-id'));
-                removePhoto(page, id);
-            });
-        });
-        // substituir foto
-        document.querySelectorAll('.replace-photo').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const page = parseInt(btn.getAttribute('data-page'));
-                const id = parseInt(btn.getAttribute('data-id'));
-                replacePhotoDialog(page, id);
-            });
-        });
-        // adicionar foto via botões
-        document.querySelectorAll('.add-photo-page').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const pageIdx = btn.getAttribute('data-page');
-                showAddPhotoOptions(parseInt(pageIdx));
-            });
-        });
-        document.querySelectorAll('[data-page-add]').forEach(div => {
-            div.addEventListener('click', (e) => {
-                const pageIdx = div.getAttribute('data-page-add');
-                showAddPhotoOptions(parseInt(pageIdx));
-            });
-        });
-        document.getElementById('addNewPageBtn')?.addEventListener('click', () => {
-            addNewPage();
-            renderAlbum();
-        });
-    }
+            document.getElementById('posterTitle').textContent = title || 'Sem título';
+            document.getElementById('posterSubtitle').textContent = subtitle || '';
+            document.getElementById('posterDescription').textContent = description || '';
+            document.getElementById('posterOffer').textContent = offer || '';
+            document.getElementById('poster').style.backgroundColor = bgColor;
+            document.getElementById('posterTitle').style.color = titleColor;
 
-    function showAddPhotoOptions(pageIdx) {
-        const sizeOptions = Object.keys(photoSizes);
-        const selection = prompt(`Escolha o tamanho da foto:\n${sizeOptions.join(', ')} (ex: 6x10)`, "10x15");
-        if(selection && photoSizes[selection]) {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if(file) {
-                    addPhotoToPage(pageIdx, selection, file);
-                } else {
-                    addPhotoToPage(pageIdx, selection, null, `Nova ${selection}`);
+            if (currentImage) {
+                let existingImage = document.getElementById('posterImage');
+                if (existingImage) {
+                    existingImage.remove();
                 }
-            };
-            input.click();
-        } else if(selection) alert("Tamanho inválido. Use 6x10, 10x15, 15x18, 18x26");
-    }
-
-    function replacePhotoDialog(pageIdx, photoId) {
-        const page = albumData.pages[pageIdx];
-        const photo = page.photos.find(p => p.id === photoId);
-        if(!photo) return;
-        const newSize = prompt(`Novo tamanho para esta foto? (atual: ${photo.sizeLabel})\nOpções: 6x10, 10x15, 15x18, 18x26`, photo.sizeLabel);
-        if(newSize && photoSizes[newSize]) {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if(file) {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        photo.src = ev.target.result;
-                        photo.dataURL = ev.target.result;
-                        photo.sizeLabel = newSize;
-                        photo.label = photoSizes[newSize].label;
-                        photo.aspect = photoSizes[newSize].aspect;
-                        renderAlbum();
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    photo.sizeLabel = newSize;
-                    photo.label = photoSizes[newSize].label;
-                    photo.aspect = photoSizes[newSize].aspect;
-                    renderAlbum();
-                }
-            };
-            input.click();
-        } else if(newSize) alert("Tamanho inválido");
-    }
-
-    function openCustomModal(target) {
-        const item = albumData[target];
-        const modal = document.getElementById('customModal');
-        document.getElementById('modalTitle').innerText = target === 'cover' ? 'Personalizar Capa' : 'Personalizar Contracapa';
-        const bodyDiv = document.getElementById('modalBody');
-        bodyDiv.innerHTML = `
-            <div class="upload-area" id="uploadCustomImage"><i class="fas fa-image"></i> Enviar imagem (qualidade original)</div>
-            <label>Cor de fundo:</label>
-            <div class="color-option" id="colorOptions">
-                <div class="color-swatch" style="background:#fdf8ed;"></div>
-                <div class="color-swatch" style="background:#e2e8f0;"></div>
-                <div class="color-swatch" style="background:#d9e3f0;"></div>
-                <div class="color-swatch" style="background:#fce4d6;"></div>
-                <div class="color-swatch" style="background:#ffffff;"></div>
-            </div>
-            <label>Texto opcional:</label>
-            <input type="text" id="coverText" value="${item.textOverlay || ''}" placeholder="Ex: Meu Álbum Especial" style="width:100%; padding:8px; margin:10px 0; border-radius:20px; border:1px solid #ccc;">
-        `;
-        const uploadDiv = document.getElementById('uploadCustomImage');
-        uploadDiv.onclick = () => {
-            const inp = document.createElement('input');
-            inp.type = 'file'; inp.accept = 'image/*';
-            inp.onchange = (e) => {
-                const file = e.target.files[0];
-                if(file) {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        item.imageURL = ev.target.result;
-                        renderAlbum();
-                        modal.style.display = 'none';
-                    };
-                    reader.readAsDataURL(file);
-                }
-            };
-            inp.click();
-        };
-        document.querySelectorAll('.color-swatch').forEach(sw => {
-            sw.addEventListener('click', () => {
-                const bgColor = sw.style.backgroundColor;
-                item.bgColor = bgColor;
-                renderAlbum();
-                modal.style.display = 'none';
-            });
-        });
-        modal.style.display = 'flex';
-        const applyBtn = document.getElementById('modalApplyBtn');
-        const closeBtn = document.getElementById('modalCloseBtn');
-        const newApply = () => {
-            const text = document.getElementById('coverText')?.value;
-            if(text !== undefined) item.textOverlay = text;
-            renderAlbum();
-            modal.style.display = 'none';
-        };
-        applyBtn.onclick = newApply;
-        closeBtn.onclick = () => modal.style.display = 'none';
-    }
-
-    function openPageBgModal(pageIdx) {
-        const newBg = prompt("Digite uma cor de fundo para esta página (ex: #fef9e6, lightblue)", albumData.pages[pageIdx].bgColor || "#ffffff");
-        if(newBg) {
-            albumData.pages[pageIdx].bgColor = newBg;
-            renderAlbum();
+                
+                const posterBody = document.querySelector('.poster-body');
+                const img = document.createElement('img');
+                img.id = 'posterImage';
+                img.src = currentImage;
+                img.style.maxWidth = '100%';
+                img.style.marginBottom = '20px';
+                img.style.borderRadius = '5px';
+                posterBody.insertBefore(img, posterBody.firstChild);
+            }
         }
-    }
 
-    // Exportação completa com DataURLs
-    document.getElementById('exportJsonBtn').addEventListener('click', () => {
-        const exportData = JSON.parse(JSON.stringify(albumData));
-        const dataStr = JSON.stringify(exportData, null, 2);
-        const blob = new Blob([dataStr], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = `album_${currentFormat}.json`; a.click();
-        URL.revokeObjectURL(url);
-    });
-    document.getElementById('importJsonBtn').addEventListener('click', () => {
-        document.getElementById('importFileInput').click();
-    });
-    document.getElementById('importFileInput').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if(file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                try {
-                    const imported = JSON.parse(ev.target.result);
-                    albumData = imported;
-                    if(!albumData.pages) albumData.pages = [];
-                    if(!albumData.cover) albumData.cover = { imageURL: null, bgColor: "#fdf8ed", textOverlay: "Meu Álbum" };
-                    if(!albumData.backcover) albumData.backcover = { imageURL: null, bgColor: "#e9ecef", textOverlay: "Fim" };
-                    renderAlbum();
-                } catch(err) { alert("Arquivo inválido"); }
-            };
-            reader.readAsText(file);
+        function uploadImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImage = e.target.result;
+                    const preview = document.getElementById('previewImage');
+                    preview.src = currentImage;
+                    preview.style.display = 'block';
+                    updatePoster();
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
         }
-    });
-    document.getElementById('printPreviewBtn').addEventListener('click', () => {
-        window.print();
-    });
-    // format selector
-    document.querySelectorAll('.format-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentFormat = btn.getAttribute('data-format');
-            renderAlbum();
+
+        function exportPoster() {
+            const poster = document.getElementById('poster');
+            html2canvas(poster, {
+                scale: 2,
+                backgroundColor: null
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'cartaz.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            }).catch(error => {
+                console.error('Erro ao exportar:', error);
+                alert('Erro ao exportar imagem. Tente novamente.');
+            });
+        }
+
+        function resetPoster() {
+            document.getElementById('title').value = 'Oferta Especial!';
+            document.getElementById('subtitle').value = 'Aproveite as melhores ofertas';
+            document.getElementById('description').value = 'Produtos de alta qualidade com preços imperdíveis. Garanta já o seu!';
+            document.getElementById('offer').value = 'Até 50% OFF';
+            document.getElementById('bgColor').value = '#ffffff';
+            document.getElementById('titleColor').value = '#333333';
+            currentImage = null;
+            document.getElementById('previewImage').style.display = 'none';
+            document.getElementById('previewImage').src = '';
+            
+            const existingImage = document.getElementById('posterImage');
+            if (existingImage) {
+                existingImage.remove();
+            }
+            
+            updatePoster();
+        }
+
+        document.querySelectorAll('.control-group input, .control-group textarea').forEach(element => {
+            element.addEventListener('input', updatePoster);
         });
-    });
-    document.querySelector('.format-btn[data-format="A4"]').classList.add('active');
-    initDemo();
-</script>
+
+        updatePoster();
+    </script>
 </body>
 </html>
