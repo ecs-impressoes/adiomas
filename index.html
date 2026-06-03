@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Criação de Cartazes</title>
+    <title>Sistema de Criação de Cartazes - Com Rodapé Editável</title>
     <style>
         * {
             margin: 0;
@@ -51,6 +51,8 @@
             padding: 20px;
             border-radius: 10px;
             height: fit-content;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .control-group {
@@ -72,6 +74,7 @@
             border: 2px solid #ddd;
             border-radius: 5px;
             font-size: 14px;
+            font-family: inherit;
         }
 
         .control-group input:focus,
@@ -155,10 +158,15 @@
             border-top: 1px solid #eee;
         }
 
+        .footer-line1, .footer-line2 {
+            margin: 5px 0;
+        }
+
         .button-group {
             display: flex;
             gap: 10px;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -195,6 +203,11 @@
             color: white;
         }
 
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
         .image-upload {
             border: 2px dashed #ddd;
             padding: 20px;
@@ -214,6 +227,16 @@
             display: none;
         }
 
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #667eea;
+            color: #667eea;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -225,12 +248,14 @@
     <div class="container">
         <div class="header">
             <h1>🎨 Sistema de Criação de Cartazes</h1>
-            <p>Crie e edite cartazes profissionais de forma simples e rápida</p>
+            <p>Crie e edite cartazes profissionais com rodapé personalizável</p>
         </div>
 
         <div class="main-content">
             <div class="controls">
                 <h3>🖌️ Opções de Edição</h3>
+                
+                <div class="section-title">📝 Conteúdo Principal</div>
                 
                 <div class="control-group">
                     <label>📝 Título Principal</label>
@@ -252,6 +277,8 @@
                     <input type="text" id="offer" placeholder="Ex: 50% OFF" value="Até 50% OFF">
                 </div>
 
+                <div class="section-title">🎨 Cores</div>
+
                 <div class="control-group">
                     <label>🎨 Cor de Fundo</label>
                     <div class="color-input">
@@ -269,12 +296,43 @@
                 </div>
 
                 <div class="control-group">
+                    <label>🎨 Cor do Rodapé</label>
+                    <div class="color-input">
+                        <input type="color" id="footerColor" value="#f8f9fa">
+                        <span>Fundo do rodapé</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>🎨 Cor do Texto do Rodapé</label>
+                    <div class="color-input">
+                        <input type="color" id="footerTextColor" value="#333333">
+                        <span>Cor do texto</span>
+                    </div>
+                </div>
+
+                <div class="section-title">🖼️ Imagem</div>
+
+                <div class="control-group">
                     <label>🖼️ Imagem (opcional)</label>
                     <div class="image-upload" onclick="document.getElementById('imageUpload').click()">
                         <p>📸 Clique para adicionar imagem</p>
                         <input type="file" id="imageUpload" accept="image/*" style="display: none;" onchange="uploadImage(this)">
                     </div>
                     <img id="previewImage" class="preview-image" alt="Preview">
+                    <button class="btn btn-info" onclick="removeImage()" style="margin-top: 10px; width: 100%;">🗑️ Remover Imagem</button>
+                </div>
+
+                <div class="section-title">📞 Rodapé</div>
+
+                <div class="control-group">
+                    <label>📞 Linha 1 do Rodapé</label>
+                    <input type="text" id="footerLine1" placeholder="Ex: 📞 Ligue agora: (11) 99999-9999" value="📞 Ligue agora: (11) 99999-9999">
+                </div>
+
+                <div class="control-group">
+                    <label>📍 Linha 2 do Rodapé</label>
+                    <input type="text" id="footerLine2" placeholder="Ex: 📍 Visite nossa loja" value="📍 Visite nossa loja ou acesse nosso site">
                 </div>
 
                 <div class="button-group">
@@ -298,9 +356,9 @@
                             Até 50% OFF
                         </div>
                     </div>
-                    <div class="poster-footer">
-                        <p>📞 Ligue agora: (11) 99999-9999</p>
-                        <p>📍 Visite nossa loja ou acesse nosso site</p>
+                    <div class="poster-footer" id="posterFooter">
+                        <div class="footer-line1" id="footerLine1Display">📞 Ligue agora: (11) 99999-9999</div>
+                        <div class="footer-line2" id="footerLine2Display">📍 Visite nossa loja ou acesse nosso site</div>
                     </div>
                 </div>
             </div>
@@ -312,34 +370,60 @@
         let currentImage = null;
 
         function updatePoster() {
+            // Pega os valores dos campos
             const title = document.getElementById('title').value;
             const subtitle = document.getElementById('subtitle').value;
             const description = document.getElementById('description').value;
             const offer = document.getElementById('offer').value;
             const bgColor = document.getElementById('bgColor').value;
             const titleColor = document.getElementById('titleColor').value;
+            const footerColor = document.getElementById('footerColor').value;
+            const footerTextColor = document.getElementById('footerTextColor').value;
+            const footerLine1 = document.getElementById('footerLine1').value;
+            const footerLine2 = document.getElementById('footerLine2').value;
 
+            // Atualiza o conteúdo
             document.getElementById('posterTitle').textContent = title || 'Sem título';
             document.getElementById('posterSubtitle').textContent = subtitle || '';
             document.getElementById('posterDescription').textContent = description || '';
             document.getElementById('posterOffer').textContent = offer || '';
+            
+            // Atualiza o rodapé
+            document.getElementById('footerLine1Display').textContent = footerLine1 || '';
+            document.getElementById('footerLine2Display').textContent = footerLine2 || '';
+            
+            // Atualiza as cores
             document.getElementById('poster').style.backgroundColor = bgColor;
             document.getElementById('posterTitle').style.color = titleColor;
+            document.getElementById('posterFooter').style.backgroundColor = footerColor;
+            document.getElementById('posterFooter').style.color = footerTextColor;
+            
+            // Atualiza a cor do texto do rodapé
+            const footerLines = document.querySelectorAll('#footerLine1Display, #footerLine2Display');
+            footerLines.forEach(line => {
+                line.style.color = footerTextColor;
+            });
 
+            // Gerencia a imagem
             if (currentImage) {
                 let existingImage = document.getElementById('posterImage');
-                if (existingImage) {
-                    existingImage.remove();
+                if (!existingImage) {
+                    const posterBody = document.querySelector('.poster-body');
+                    const img = document.createElement('img');
+                    img.id = 'posterImage';
+                    img.style.maxWidth = '100%';
+                    img.style.marginBottom = '20px';
+                    img.style.borderRadius = '5px';
+                    posterBody.insertBefore(img, posterBody.firstChild);
+                    existingImage = img;
                 }
-                
-                const posterBody = document.querySelector('.poster-body');
-                const img = document.createElement('img');
-                img.id = 'posterImage';
-                img.src = currentImage;
-                img.style.maxWidth = '100%';
-                img.style.marginBottom = '20px';
-                img.style.borderRadius = '5px';
-                posterBody.insertBefore(img, posterBody.firstChild);
+                existingImage.src = currentImage;
+                existingImage.style.display = 'block';
+            } else {
+                const existingImage = document.getElementById('posterImage');
+                if (existingImage) {
+                    existingImage.style.display = 'none';
+                }
             }
         }
 
@@ -355,6 +439,17 @@
                 };
                 reader.readAsDataURL(input.files[0]);
             }
+        }
+
+        function removeImage() {
+            currentImage = null;
+            document.getElementById('previewImage').style.display = 'none';
+            document.getElementById('previewImage').src = '';
+            const existingImage = document.getElementById('posterImage');
+            if (existingImage) {
+                existingImage.style.display = 'none';
+            }
+            updatePoster();
         }
 
         function exportPoster() {
@@ -374,28 +469,31 @@
         }
 
         function resetPoster() {
+            // Reseta todos os campos
             document.getElementById('title').value = 'Oferta Especial!';
             document.getElementById('subtitle').value = 'Aproveite as melhores ofertas';
             document.getElementById('description').value = 'Produtos de alta qualidade com preços imperdíveis. Garanta já o seu!';
             document.getElementById('offer').value = 'Até 50% OFF';
             document.getElementById('bgColor').value = '#ffffff';
             document.getElementById('titleColor').value = '#333333';
-            currentImage = null;
-            document.getElementById('previewImage').style.display = 'none';
-            document.getElementById('previewImage').src = '';
+            document.getElementById('footerColor').value = '#f8f9fa';
+            document.getElementById('footerTextColor').value = '#333333';
+            document.getElementById('footerLine1').value = '📞 Ligue agora: (11) 99999-9999';
+            document.getElementById('footerLine2').value = '📍 Visite nossa loja ou acesse nosso site';
             
-            const existingImage = document.getElementById('posterImage');
-            if (existingImage) {
-                existingImage.remove();
-            }
+            // Remove a imagem
+            removeImage();
             
+            // Atualiza o cartaz
             updatePoster();
         }
 
+        // Adiciona eventos para atualização automática
         document.querySelectorAll('.control-group input, .control-group textarea').forEach(element => {
             element.addEventListener('input', updatePoster);
         });
 
+        // Inicializa o cartaz
         updatePoster();
     </script>
 </body>
