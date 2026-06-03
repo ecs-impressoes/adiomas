@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Criação de Cartazes - Com Rodapé Editável</title>
+    <title>Sistema de Criação de Cartazes - Formato A4/A3</title>
     <style>
         * {
             margin: 0;
@@ -100,66 +100,149 @@
             background: #f8f9fa;
             padding: 20px;
             border-radius: 10px;
-            min-height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 600px;
         }
 
+        /* Container para o cartaz com scroll se necessário */
+        .poster-container {
+            overflow-x: auto;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            min-height: 600px;
+        }
+
+        /* Estilos base do cartaz */
         .poster {
             background: white;
-            border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            overflow: hidden;
             transition: all 0.3s ease;
-            min-height: 500px;
             display: flex;
             flex-direction: column;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        /* Formato A4 (retrato) */
+        .poster.a4 {
+            width: 794px; /* 210mm em pixels (96dpi) */
+            min-height: 1123px; /* 297mm em pixels */
+            height: auto;
+        }
+
+        /* Formato A3 (retrato) */
+        .poster.a3 {
+            width: 1123px; /* 297mm em pixels */
+            min-height: 1587px; /* 420mm em pixels */
+            height: auto;
+        }
+
+        /* Formato A4 paisagem */
+        .poster.a4-landscape {
+            width: 1123px;
+            min-height: 794px;
+            height: auto;
+        }
+
+        /* Formato A3 paisagem */
+        .poster.a3-landscape {
+            width: 1587px;
+            min-height: 1123px;
+            height: auto;
         }
 
         .poster-header {
-            padding: 30px;
+            padding: 40px 30px 30px 30px;
             text-align: center;
-            border-bottom: 1px solid #eee;
+            border-bottom: 2px solid #eee;
         }
 
         .poster-title {
-            font-size: 32px;
+            font-size: 42px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            line-height: 1.2;
         }
 
         .poster-subtitle {
-            font-size: 18px;
+            font-size: 22px;
             color: #666;
         }
 
         .poster-body {
-            padding: 30px;
+            padding: 40px 30px;
             flex-grow: 1;
         }
 
+        .image-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .poster-image {
+            max-width: 100%;
+            max-height: 400px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            border-radius: 8px;
+        }
+
+        /* Ajustes para A3 */
+        .poster.a3 .poster-image,
+        .poster.a3-landscape .poster-image {
+            max-height: 500px;
+        }
+
         .poster-description {
-            font-size: 16px;
+            font-size: 18px;
             line-height: 1.6;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            text-align: center;
         }
 
         .poster-offer {
-            background: #f0f0f0;
-            padding: 15px;
-            border-radius: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 10px;
             text-align: center;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 28px;
+            color: white;
+            margin: 20px 0;
         }
 
         .poster-footer {
-            padding: 20px;
+            padding: 25px;
             text-align: center;
             background: #f8f9fa;
-            border-top: 1px solid #eee;
+            border-top: 2px solid #eee;
+            margin-top: auto;
         }
 
         .footer-line1, .footer-line2 {
-            margin: 5px 0;
+            margin: 8px 0;
+            font-size: 16px;
+        }
+
+        /* Ajustes para A3 no rodapé */
+        .poster.a3 .footer-line1,
+        .poster.a3 .footer-line2,
+        .poster.a3-landscape .footer-line1,
+        .poster.a3-landscape .footer-line2 {
+            font-size: 18px;
         }
 
         .button-group {
@@ -222,9 +305,10 @@
 
         .preview-image {
             max-width: 100%;
-            max-height: 200px;
+            max-height: 150px;
             margin-top: 10px;
             display: none;
+            border-radius: 5px;
         }
 
         .section-title {
@@ -237,9 +321,64 @@
             color: #667eea;
         }
 
+        .image-size-control {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .image-size-control input {
+            flex: 1;
+        }
+
+        .format-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .format-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+
+        .format-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .format-btn:hover {
+            border-color: #667eea;
+        }
+
+        @media (max-width: 1200px) {
+            .poster-container {
+                overflow-x: auto;
+            }
+            
+            .poster.a3,
+            .poster.a3-landscape {
+                transform: scale(0.7);
+                transform-origin: center;
+            }
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
+            }
+            
+            .poster.a4,
+            .poster.a4-landscape {
+                transform: scale(0.6);
+                transform-origin: center;
             }
         }
     </style>
@@ -248,18 +387,30 @@
     <div class="container">
         <div class="header">
             <h1>🎨 Sistema de Criação de Cartazes</h1>
-            <p>Crie e edite cartazes profissionais com rodapé personalizável</p>
+            <p>Crie cartazes profissionais nos formatos A4 e A3</p>
         </div>
 
         <div class="main-content">
             <div class="controls">
                 <h3>🖌️ Opções de Edição</h3>
                 
+                <div class="section-title">📏 Formato do Cartaz</div>
+                
+                <div class="control-group">
+                    <label>Escolha o formato:</label>
+                    <div class="format-selector">
+                        <button class="format-btn active" onclick="changeFormat('a4')">A4 Retrato</button>
+                        <button class="format-btn" onclick="changeFormat('a4-landscape')">A4 Paisagem</button>
+                        <button class="format-btn" onclick="changeFormat('a3')">A3 Retrato</button>
+                        <button class="format-btn" onclick="changeFormat('a3-landscape')">A3 Paisagem</button>
+                    </div>
+                </div>
+                
                 <div class="section-title">📝 Conteúdo Principal</div>
                 
                 <div class="control-group">
                     <label>📝 Título Principal</label>
-                    <input type="text" id="title" placeholder="Digite o título do cartaz" value="Oferta Especial!">
+                    <input type="text" id="title" placeholder="Digite o título do cartaz" value="OFERTA ESPECIAL!">
                 </div>
 
                 <div class="control-group">
@@ -274,7 +425,7 @@
 
                 <div class="control-group">
                     <label>🏷️ Oferta Especial</label>
-                    <input type="text" id="offer" placeholder="Ex: 50% OFF" value="Até 50% OFF">
+                    <input type="text" id="offer" placeholder="Ex: 50% OFF" value="ATÉ 50% OFF">
                 </div>
 
                 <div class="section-title">🎨 Cores</div>
@@ -292,6 +443,14 @@
                     <div class="color-input">
                         <input type="color" id="titleColor" value="#333333">
                         <span>Cor do título</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>🎨 Cor da Oferta</label>
+                    <div class="color-input">
+                        <input type="color" id="offerColor" value="#667eea">
+                        <span>Fundo da oferta</span>
                     </div>
                 </div>
 
@@ -320,6 +479,13 @@
                         <input type="file" id="imageUpload" accept="image/*" style="display: none;" onchange="uploadImage(this)">
                     </div>
                     <img id="previewImage" class="preview-image" alt="Preview">
+                    
+                    <div class="image-size-control" id="imageSizeControl" style="display: none;">
+                        <label>📏 Altura máxima da imagem:</label>
+                        <input type="range" id="imageHeight" min="100" max="500" value="300" step="10">
+                        <span id="heightValue">300px</span>
+                    </div>
+                    
                     <button class="btn btn-info" onclick="removeImage()" style="margin-top: 10px; width: 100%;">🗑️ Remover Imagem</button>
                 </div>
 
@@ -340,25 +506,34 @@
                     <button class="btn btn-success" onclick="exportPoster()">📸 Exportar como Imagem</button>
                     <button class="btn btn-danger" onclick="resetPoster()">🔄 Resetar</button>
                 </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="printPoster()">🖨️ Imprimir Cartaz</button>
+                </div>
             </div>
 
             <div class="poster-preview">
-                <div class="poster" id="poster">
-                    <div class="poster-header" id="posterHeader">
-                        <div class="poster-title" id="posterTitle">Oferta Especial!</div>
-                        <div class="poster-subtitle" id="posterSubtitle">Aproveite as melhores ofertas</div>
-                    </div>
-                    <div class="poster-body">
-                        <div class="poster-description" id="posterDescription">
-                            Produtos de alta qualidade com preços imperdíveis. Garanta já o seu!
+                <div class="poster-container">
+                    <div class="poster a4" id="poster">
+                        <div class="poster-header" id="posterHeader">
+                            <div class="poster-title" id="posterTitle">OFERTA ESPECIAL!</div>
+                            <div class="poster-subtitle" id="posterSubtitle">Aproveite as melhores ofertas</div>
                         </div>
-                        <div class="poster-offer" id="posterOffer">
-                            Até 50% OFF
+                        <div class="poster-body">
+                            <div class="image-container" id="imageContainer" style="display: none;">
+                                <img id="posterImage" class="poster-image" alt="Imagem do cartaz">
+                            </div>
+                            <div class="poster-description" id="posterDescription">
+                                Produtos de alta qualidade com preços imperdíveis. Garanta já o seu!
+                            </div>
+                            <div class="poster-offer" id="posterOffer">
+                                ATÉ 50% OFF
+                            </div>
                         </div>
-                    </div>
-                    <div class="poster-footer" id="posterFooter">
-                        <div class="footer-line1" id="footerLine1Display">📞 Ligue agora: (11) 99999-9999</div>
-                        <div class="footer-line2" id="footerLine2Display">📍 Visite nossa loja ou acesse nosso site</div>
+                        <div class="poster-footer" id="posterFooter">
+                            <div class="footer-line1" id="footerLine1Display">📞 Ligue agora: (11) 99999-9999</div>
+                            <div class="footer-line2" id="footerLine2Display">📍 Visite nossa loja ou acesse nosso site</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -368,6 +543,24 @@
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script>
         let currentImage = null;
+        let currentFormat = 'a4';
+
+        function changeFormat(format) {
+            currentFormat = format;
+            
+            // Remove todas as classes de formato
+            const poster = document.getElementById('poster');
+            poster.classList.remove('a4', 'a4-landscape', 'a3', 'a3-landscape');
+            poster.classList.add(format);
+            
+            // Atualiza botões ativos
+            document.querySelectorAll('.format-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            updatePoster();
+        }
 
         function updatePoster() {
             // Pega os valores dos campos
@@ -377,10 +570,12 @@
             const offer = document.getElementById('offer').value;
             const bgColor = document.getElementById('bgColor').value;
             const titleColor = document.getElementById('titleColor').value;
+            const offerColor = document.getElementById('offerColor').value;
             const footerColor = document.getElementById('footerColor').value;
             const footerTextColor = document.getElementById('footerTextColor').value;
             const footerLine1 = document.getElementById('footerLine1').value;
             const footerLine2 = document.getElementById('footerLine2').value;
+            const imageHeight = document.getElementById('imageHeight').value;
 
             // Atualiza o conteúdo
             document.getElementById('posterTitle').textContent = title || 'Sem título';
@@ -395,6 +590,7 @@
             // Atualiza as cores
             document.getElementById('poster').style.backgroundColor = bgColor;
             document.getElementById('posterTitle').style.color = titleColor;
+            document.getElementById('posterOffer').style.background = `linear-gradient(135deg, ${offerColor} 0%, ${offerColor}cc 100%)`;
             document.getElementById('posterFooter').style.backgroundColor = footerColor;
             document.getElementById('posterFooter').style.color = footerTextColor;
             
@@ -404,26 +600,22 @@
                 line.style.color = footerTextColor;
             });
 
-            // Gerencia a imagem
+            // Gerencia a imagem com centralização e sem cortes
+            const imageContainer = document.getElementById('imageContainer');
+            const posterImage = document.getElementById('posterImage');
+            
             if (currentImage) {
-                let existingImage = document.getElementById('posterImage');
-                if (!existingImage) {
-                    const posterBody = document.querySelector('.poster-body');
-                    const img = document.createElement('img');
-                    img.id = 'posterImage';
-                    img.style.maxWidth = '100%';
-                    img.style.marginBottom = '20px';
-                    img.style.borderRadius = '5px';
-                    posterBody.insertBefore(img, posterBody.firstChild);
-                    existingImage = img;
-                }
-                existingImage.src = currentImage;
-                existingImage.style.display = 'block';
+                posterImage.src = currentImage;
+                posterImage.style.maxHeight = imageHeight + 'px';
+                posterImage.style.width = 'auto';
+                posterImage.style.maxWidth = '100%';
+                posterImage.style.objectFit = 'contain';
+                imageContainer.style.display = 'flex';
+                imageContainer.style.justifyContent = 'center';
+                imageContainer.style.alignItems = 'center';
+                imageContainer.style.width = '100%';
             } else {
-                const existingImage = document.getElementById('posterImage');
-                if (existingImage) {
-                    existingImage.style.display = 'none';
-                }
+                imageContainer.style.display = 'none';
             }
         }
 
@@ -435,6 +627,10 @@
                     const preview = document.getElementById('previewImage');
                     preview.src = currentImage;
                     preview.style.display = 'block';
+                    
+                    // Mostra o controle de tamanho
+                    document.getElementById('imageSizeControl').style.display = 'flex';
+                    
                     updatePoster();
                 };
                 reader.readAsDataURL(input.files[0]);
@@ -445,10 +641,8 @@
             currentImage = null;
             document.getElementById('previewImage').style.display = 'none';
             document.getElementById('previewImage').src = '';
-            const existingImage = document.getElementById('posterImage');
-            if (existingImage) {
-                existingImage.style.display = 'none';
-            }
+            document.getElementById('imageSizeControl').style.display = 'none';
+            document.getElementById('imageContainer').style.display = 'none';
             updatePoster();
         }
 
@@ -456,10 +650,13 @@
             const poster = document.getElementById('poster');
             html2canvas(poster, {
                 scale: 2,
-                backgroundColor: null
+                backgroundColor: null,
+                useCORS: true,
+                logging: false
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'cartaz.png';
+                const formatName = currentFormat.toUpperCase();
+                link.download = `cartaz_${formatName}.png`;
                 link.href = canvas.toDataURL();
                 link.click();
             }).catch(error => {
@@ -468,29 +665,105 @@
             });
         }
 
+        function printPoster() {
+            const poster = document.getElementById('poster');
+            html2canvas(poster, {
+                scale: 3,
+                backgroundColor: null,
+                useCORS: true
+            }).then(canvas => {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Imprimir Cartaz</title>
+                            <style>
+                                body {
+                                    margin: 0;
+                                    padding: 0;
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                    min-height: 100vh;
+                                }
+                                img {
+                                    max-width: 100%;
+                                    height: auto;
+                                }
+                                @media print {
+                                    body {
+                                        margin: 0;
+                                        padding: 0;
+                                    }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <img src="${canvas.toDataURL()}" alt="Cartaz">
+                            <script>
+                                window.onload = function() {
+                                    window.print();
+                                    window.onafterprint = function() {
+                                        window.close();
+                                    };
+                                };
+                            <\/script>
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+            });
+        }
+
         function resetPoster() {
             // Reseta todos os campos
-            document.getElementById('title').value = 'Oferta Especial!';
+            document.getElementById('title').value = 'OFERTA ESPECIAL!';
             document.getElementById('subtitle').value = 'Aproveite as melhores ofertas';
             document.getElementById('description').value = 'Produtos de alta qualidade com preços imperdíveis. Garanta já o seu!';
-            document.getElementById('offer').value = 'Até 50% OFF';
+            document.getElementById('offer').value = 'ATÉ 50% OFF';
             document.getElementById('bgColor').value = '#ffffff';
             document.getElementById('titleColor').value = '#333333';
+            document.getElementById('offerColor').value = '#667eea';
             document.getElementById('footerColor').value = '#f8f9fa';
             document.getElementById('footerTextColor').value = '#333333';
             document.getElementById('footerLine1').value = '📞 Ligue agora: (11) 99999-9999';
             document.getElementById('footerLine2').value = '📍 Visite nossa loja ou acesse nosso site';
+            document.getElementById('imageHeight').value = '300';
+            document.getElementById('heightValue').textContent = '300px';
             
             // Remove a imagem
             removeImage();
+            
+            // Reseta para formato A4
+            currentFormat = 'a4';
+            const poster = document.getElementById('poster');
+            poster.classList.remove('a4-landscape', 'a3', 'a3-landscape');
+            poster.classList.add('a4');
+            
+            // Atualiza botões
+            const buttons = document.querySelectorAll('.format-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === 'A4 Retrato') {
+                    btn.classList.add('active');
+                }
+            });
             
             // Atualiza o cartaz
             updatePoster();
         }
 
+        // Controle de altura da imagem
+        document.getElementById('imageHeight').addEventListener('input', function(e) {
+            document.getElementById('heightValue').textContent = e.target.value + 'px';
+            updatePoster();
+        });
+
         // Adiciona eventos para atualização automática
         document.querySelectorAll('.control-group input, .control-group textarea').forEach(element => {
-            element.addEventListener('input', updatePoster);
+            if (element.id !== 'imageHeight') {
+                element.addEventListener('input', updatePoster);
+            }
         });
 
         // Inicializa o cartaz
